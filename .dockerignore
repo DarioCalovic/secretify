@@ -1,0 +1,4 @@
+ui/node_modules
+ui/package-lock.json
+socket/node_modules
+socket/package-lock.json

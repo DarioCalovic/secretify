@@ -1,0 +1,119 @@
+<template>
+  <div class="container">
+    <div class="columns is-centered dotted">
+      <div class="column is-5">
+        <div class="card">
+          <div class="card-content">
+            <div class="content">
+              Transfer still under construction. Try meanwhile sharing a secret
+              😊.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+const Peer = require('simple-peer')
+const io = require('socket.io-client')
+const useTrickle = true
+let socket = null
+const peers = []
+export default {
+  name: 'Socket',
+  data() {
+    return {
+      test: '',
+      hasConnected: false,
+    }
+  },
+  mounted() {
+    let isInitiator = false
+
+    if ('initiator' in this.$route.query && this.$route.query.initiator) {
+      console.log('I am initiator')
+      isInitiator = true
+    }
+
+    if (!this.hasConnected) {
+      socket = io.connect('http://localhost:5000', {
+        query: {
+          initiator: isInitiator,
+        },
+      })
+
+      socket.on('connect', function () {
+        console.log('Connected to signalling server, Peer ID: %s', socket.id)
+        this.hasConnected = true
+      })
+
+      socket.on('disconnect', () => {
+        socket.removeAllListeners()
+      })
+      socket.on('peer', function (data) {
+        const peerId = data.peerId
+        const peer = new Peer({
+          initiator: data.initiator,
+          trickle: useTrickle,
+        })
+
+        socket.on('signal', function (data) {
+          if (data.peerId === peerId) {
+            console.log(
+              'Received signalling data',
+              data,
+              'from Peer ID:',
+              peerId
+            )
+            peer.signal(data.signal)
+          }
+        })
+        peer.on('signal', function (data) {
+          console.log(
+            'Advertising signalling data',
+            data,
+            'to Peer ID:',
+            peerId
+          )
+          socket.emit('signal', {
+            signal: data,
+            peerId,
+          })
+        })
+        peer.on('error', function (e) {
+          console.log('Error sending connection to peer %s:', peerId, e)
+        })
+        peer.on('connect', function () {
+          console.log('Peer connection established')
+          peer.send('hey peer')
+        })
+        peer.on('data', function (data) {
+          console.log('Recieved data from peer:', data)
+        })
+        peers[peerId] = peer
+      })
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    const answer = window.confirm(
+      'Do you really want to leave? you have unsaved changes!'
+    )
+    if (answer) {
+      for (const peer in peers) {
+        console.log(peer)
+      }
+      socket.disconnect()
+      next()
+    } else {
+      next(false)
+    }
+  },
+  head() {
+    return {
+      title: 'Transfer — secretify.io',
+    }
+  },
+}
+</script>

@@ -1,0 +1,86 @@
+<template>
+  <div>Socket</div>
+</template>
+
+<script>
+const io = require('socket.io-client')
+
+export default {
+  name: 'Socket',
+  data() {
+    return {
+      test: '',
+      hasConnected: false,
+    }
+  },
+  mounted() {
+    let isInitiator = false
+
+    if ('initiator' in this.$route.params && this.$route.params.initiator) {
+      console.log('I am initiator')
+      isInitiator = true
+    }
+
+    if (!this.hasConnected) {
+      const socket = io.connect('http://localhost:5000', {
+        query: {
+          initiator: isInitiator,
+        },
+      })
+
+      socket.on('connect', function () {
+        console.log('Connected to signalling server, Peer ID: %s', socket.id)
+        this.hasConnected = true
+      })
+
+      socket.on('disconnect', () => {
+        socket.removeAllListeners()
+      })
+      socket.on('peer', function (data) {
+        // const peerId = data.peerId
+        console.log(data)
+        // const peer = new Peer({
+        //   initiator: data.initiator,
+        //   trickle: useTrickle,
+        // })
+        //
+        // console.log(
+        //   'Peer available for connection discovered from signalling server, Peer ID: %s',
+        //   peerId
+        // )
+
+        // socket.on('signal', function (data) {
+        //   if (data.peerId == peerId) {
+        //     console.log(
+        //       'Received signalling data',
+        //       data,
+        //       'from Peer ID:',
+        //       peerId
+        //     )
+        //     peer.signal(data.signal)
+        //   }
+        // })
+        //
+        // peer.on('signal', function (data) {
+        //   debug('Advertising signalling data', data, 'to Peer ID:', peerId)
+        //   socket.emit('signal', {
+        //     signal: data,
+        //     peerId: peerId,
+        //   })
+        // })
+        // peer.on('error', function (e) {
+        //   console.log('Error sending connection to peer %s:', peerId, e)
+        // })
+        // peer.on('connect', function () {
+        //   console.log('Peer connection established')
+        //   peer.send('hey peer')
+        // })
+        // peer.on('data', function (data) {
+        //   console.log('Recieved data from peer:', data)
+        // })
+        // peers[peerId] = peer
+      })
+    }
+  },
+}
+</script>

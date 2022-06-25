@@ -1,0 +1,203 @@
+/* Theme style (colors & sizes) */
+@import "theme-default";
+
+/* Core Libs & Lib configs */
+@import "libs/all";
+
+/* Theme components */
+@import "nav-bar";
+@import "footer";
+
+.card {
+    border-radius: 4px;
+    border: 0;
+    box-shadow: 0 15px 45px rgb(16 30 54 / 15%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+}
+
+.dotted {
+    background: url("~/assets/img/dots.svg");
+}
+
+@media (min-width: 768px) {
+    .head {
+        padding: 1.1rem;
+    }
+
+    .dotted {
+        padding: 3rem;
+    }
+}
+
+.content ul {
+    margin: 0;
+}
+
+.collapse-trigger .field {
+    padding: 0.5rem 0 1rem 0;
+}
+
+nav.tabs {
+    border-bottom: 1px solid #dbdbdb;
+}
+
+.b-tabs .tab-content {
+    padding: 1.5rem;
+}
+
+.tabs a {
+    padding: 1em 1.5em;
+}
+
+.field.no-padding,
+.field.no-padding .control {
+    margin-bottom: 0;
+}
+
+.action-icon {
+    cursor: pointer;
+    border-radius: 50px;
+    border: 2px solid $primary;
+    width: 1.8rem;
+    height: 1.8rem;
+    color: $primary;
+    opacity: 0.8;
+}
+
+.action-icon:hover {
+    opacity: 1;
+}
+
+.label {
+    font-weight: 600;
+}
+
+.dark .icon {
+    color: $primary;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.title,
+.subtitle {
+    color: white;
+}
+
+.white,
+.white strong,
+.white .button {
+    color: white;
+}
+
+.button.is-text {
+    text-decoration: none;
+}
+
+.button.is-text:hover,
+.button.is-text.is-hovered,
+.button.is-text:focus,
+.button.is-text.is-focused {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.white .button.is-text:hover,
+.white .button.is-text.is-hovered,
+.white .button.is-text:focus,
+.white .button.is-text.is-focused {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.subtitle {
+    margin-top: 0 !important;
+}
+
+.subtitle strong {
+    color: #ffffff;
+}
+
+.subtitle a {
+    text-decoration: underline;
+    color: white;
+}
+
+.textarea:not([rows]) {
+    min-height: 12em;
+}
+
+.file--block .textarea:not([rows]) {
+    min-height: 6em;
+}
+.dark {
+    white-space: nowrap;
+}
+
+.tabs li.is-active {
+    font-weight: 500;
+}
+
+.upload .upload-draggable.is-danger,
+.upload .upload-draggable.is-hovered.is-danger {
+    border-color: #f14668;
+    background: rgba(241, 70, 104, 0.05);
+}
+
+.darkness .cl {
+    font-size: 1.4rem;
+    color: #fff;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.darkness .cl .tag {
+    margin: 5px;
+}
+
+.darkness p {
+    margin-bottom: 1rem;
+}
+
+.darkness p,
+.darkness strong {
+    color: #fff;
+}
+
+.darkness ul {
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.darkness ul li {
+    color: #fff;
+    list-style-type: circle;
+}
+
+.darkness h1.title {
+    font-size: 2.6rem;
+}
+
+.darkness h2.title {
+    margin-bottom: 0.5rem;
+}
+
+.darkness .title {
+    color: #fff;
+}
+
+.darkness a {
+    text-decoration: underline;
+    color: #ffffff;
+}
+
+.darkness a:hover {
+    color: rgba(255, 255, 255, 0.6);
+}

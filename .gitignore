@@ -1,0 +1,8 @@
+_archive/
+_files/
+ui/node_modules/
+ui/.nuxt/
+ui/package-lock.json
+socket/
+secretify.db
+docker-compose*

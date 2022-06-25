@@ -1,0 +1,588 @@
+<template>
+  <div class="container">
+    <div class="columns is-vcentered is-centered dotted">
+      <div class="column is-12">
+        <h2 class="title is-1">The safe way to share secrets</h2>
+        <h3 class="subtitle is-3">
+          Keep sensitive information out of your email and chat logs. Read more
+          <a href="/about">about</a> it.
+        </h3>
+        <div class="card mt-6">
+          <b-tabs v-model="activeTab">
+            <b-tab-item label="Text">
+              <ValidationObserver ref="form">
+                <form @submit.prevent="onCreateSecret">
+                  <ValidationProvider rules="required" name="Secret" slim>
+                    <b-field
+                      slot-scope="{ errors }"
+                      label="Secret"
+                      :type="{ 'is-danger': errors[0] }"
+                      :message="
+                        errors.length > 0 ? errors : fieldMessages.secret
+                      "
+                    >
+                      <b-input
+                        v-model="form.secret.value"
+                        :maxlength="policySetting.secret.max_length"
+                        type="textarea"
+                        placeholder="Tell me a secret.."
+                      ></b-input>
+                    </b-field>
+                  </ValidationProvider>
+                  <b-field
+                    v-show="policySetting.passphrase.required"
+                    label="Passphrase"
+                  >
+                    <b-input
+                      v-model="form.passphrase.value"
+                      type="password"
+                      :required="policySetting.passphrase.required"
+                    ></b-input>
+                  </b-field>
+                  <b-field
+                    v-show="false"
+                    label="Email (not working yet)"
+                    message="Your email address is used only for security reasons. This will also allow us to send you a copy of the link and notify you when somebody reveals the secret."
+                  >
+                    <b-input type="email" placeholder="Your email"></b-input>
+                  </b-field>
+                  <b-field>
+                    <b-collapse
+                      aria-id="collapseAddInfos"
+                      animation="slide"
+                      v-model="isOpen"
+                    >
+                      <div>
+                        <b-field
+                          v-show="!policySetting.passphrase.required"
+                          label="Passphrase"
+                          message="Only the one with the passphrase can reveal the secret. Not even an administrator can restore it."
+                        >
+                          <b-input
+                            v-model="form.passphrase.value"
+                            type="password"
+                            :required="policySetting.passphrase.required"
+                          ></b-input>
+                        </b-field>
+                        <b-field
+                          label="Expires in"
+                          message="Once the secret expires, it will be deleted automatically."
+                        >
+                          <b-select
+                            v-model="form.expiresAt.value"
+                            placeholder="Select a time"
+                          >
+                            <option value="5m">5 minutes</option>
+                            <option value="1h">1 hour</option>
+                            <option value="24h">1 day</option>
+                            <option value="168h">7 days</option>
+                          </b-select>
+                        </b-field>
+                        <b-field
+                          message="Revealed once, the secret will be deleted automatically."
+                        >
+                          <b-switch v-model="form.revealOnce.value"
+                            >Reveal secret only once</b-switch
+                          >
+                        </b-field>
+                        <!--
+                      <b-field label="Notify (coming soon)">
+                        <b-radio
+                          v-model="radio"
+                          name="name"
+                          native-value="none"
+                        >
+                          None
+                        </b-radio>
+                        <b-radio
+                          v-model="radio"
+                          name="name"
+                          native-value="email"
+                          disabled
+                        >
+                          Email
+                        </b-radio>
+                        <b-radio
+                          v-model="radio"
+                          name="name"
+                          native-value="webhook"
+                          disabled
+                        >
+                          Webhook
+                        </b-radio>
+                      </b-field>
+                      <b-field
+                        v-show="
+                          this.policySetting.webhook.enabled &&
+                          radio == 'webhook'
+                        "
+                        label="Webhook"
+                        message="Notify a web service once a secret was created or revealed."
+                      >
+                        <b-input
+                          v-model="form.webhook.value"
+                          type="text"
+                        ></b-input>
+                      </b-field>
+                      <b-field
+                        v-show="
+                          this.policySetting.mail.enabled && radio == 'email'
+                        "
+                        label="Email"
+                        message="Get notified via email as soon as someone reveals the secret."
+                      >
+                        <b-input
+                          v-model="form.email.value"
+                          type="text"
+                          disabled
+                        ></b-input>
+                      </b-field>
+                      
+                      --></div>
+                    </b-collapse>
+                  </b-field>
+
+                  <div class="level">
+                    <div class="level-left">
+                      <div class="level-item">
+                        <b-icon
+                          class="action-icon"
+                          icon="dots-horizontal"
+                          @click.native="isOpen = !isOpen"
+                        >
+                        </b-icon>
+                      </div>
+                    </div>
+                    <div class="level-right">
+                      <div class="level-item">
+                        <b-field class="is-grouped is-grouped-right">
+                          <div class="control">
+                            <b-button native-type="submit" type="is-primary"
+                              >Create secret</b-button
+                            >
+                          </div>
+                          <!--
+                    <div class="control">
+                      <nuxt-link
+                        class="button is-primary"
+                        :to="{
+                          name: 'transfer',
+                          params: {
+                            initiator: true,
+                            secret: form.secret.value,
+                          },
+                        }"
+                        >Transfer secret</nuxt-link
+                      >
+                    </div>-->
+                        </b-field>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </ValidationObserver>
+            </b-tab-item>
+            <b-tab-item label="File">
+              <ValidationObserver ref="formFile">
+                <form @submit.prevent="onCreateSecretFile">
+                  <ValidationProvider
+                    :rules="
+                      'required|size:' +
+                      policySetting.storage.filesystem.max_filesize / 1000 +
+                      (policySetting.storage.filesystem.allowed_file_extensions
+                        ? '|ext:' +
+                          policySetting.storage.filesystem
+                            .allowed_file_extensions
+                        : '')
+                    "
+                    name="File"
+                    slim
+                  >
+                    <b-field
+                      slot-scope="{ errors }"
+                      :message="errors.length > 0 ? errors : ''"
+                      type="is-danger"
+                    >
+                      <b-upload
+                        v-model="file"
+                        drag-drop
+                        expanded
+                        validationMessage="Please select a file"
+                        :type="errors.length > 0 ? 'is-danger' : ''"
+                      >
+                        <section class="section">
+                          <div class="content has-text-centered">
+                            <p>
+                              <b-icon icon="upload" size="is-large"> </b-icon>
+                            </p>
+                            <span v-if="!file">
+                              <p>
+                                Drop your file here or click to upload (Max.
+                                {{
+                                  policySetting.storage.filesystem.max_filesize
+                                    | formatBytes
+                                }})
+                              </p>
+                              <p
+                                class="help"
+                                v-if="
+                                  policySetting.storage.filesystem
+                                    .allowed_file_extensions
+                                "
+                              >
+                                Allowed file extensions are
+                                {{
+                                  policySetting.storage.filesystem
+                                    .allowed_file_extensions
+                                }}
+                              </p>
+                            </span>
+                            <span v-else>
+                              <p>
+                                {{ file.name }} ({{ file.size | formatBytes }})
+                              </p>
+                            </span>
+                          </div>
+                        </section>
+                      </b-upload></b-field
+                    > </ValidationProvider
+                  ><b-field>
+                    <b-collapse
+                      aria-id="collapseAddInfosFile"
+                      animation="slide"
+                      v-model="isOpenFile"
+                    >
+                      <div class="file--block">
+                        <b-field
+                          label="Message"
+                          message="The message will be encrypted client-side as well as the file."
+                        >
+                          <b-input
+                            v-model="form.secret.value"
+                            :maxlength="
+                              this.policySetting.secret.max_length / 2
+                            "
+                            type="textarea"
+                            placeholder=""
+                            :required="false"
+                          ></b-input>
+                        </b-field>
+                        <b-field
+                          v-show="!this.policySetting.passphrase.required"
+                          label="Passphrase"
+                          message="Only the one with the passphrase can reveal the secret. Not even an administrator can restore it."
+                        >
+                          <b-input
+                            v-model="form.passphrase.value"
+                            type="password"
+                            :required="this.policySetting.passphrase.required"
+                          ></b-input>
+                        </b-field>
+                        <b-field
+                          label="Expires in"
+                          message="Once the secret expires, it will be deleted automatically."
+                        >
+                          <b-select
+                            v-model="form.expiresAt.value"
+                            placeholder="Select a time"
+                          >
+                            <option value="5m">5 minutes</option>
+                            <option value="1h">1 hour</option>
+                            <option value="24h">1 day</option>
+                            <option value="168h">7 days</option>
+                          </b-select>
+                        </b-field>
+                        <b-field
+                          message="Revealed once, the secret will be deleted automatically."
+                        >
+                          <b-switch v-model="form.revealOnce.value"
+                            >Reveal secret only once</b-switch
+                          >
+                        </b-field>
+                      </div>
+                    </b-collapse>
+                  </b-field>
+                  <div class="level">
+                    <div class="level-left">
+                      <div class="level-item">
+                        <b-icon
+                          class="action-icon"
+                          icon="dots-horizontal"
+                          @click.native="isOpenFile = !isOpenFile"
+                        >
+                        </b-icon>
+                      </div>
+                    </div>
+                    <div class="level-right">
+                      <div class="level-item">
+                        <b-field class="is-grouped is-grouped-right">
+                          <div class="control">
+                            <b-button native-type="submit" type="is-primary"
+                              >Create secret</b-button
+                            >
+                          </div>
+                          <!--
+                    <div class="control">
+                      <nuxt-link
+                        class="button is-primary"
+                        :to="{
+                          name: 'transfer',
+                          params: {
+                            initiator: true,
+                            secret: form.secret.value,
+                          },
+                        }"
+                        >Transfer secret</nuxt-link
+                      >
+                    </div>-->
+                        </b-field>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </ValidationObserver></b-tab-item
+            >
+            <!--<b-tab-item label="Live"
+              ><div>
+                <p class="pb-4">
+                  Create a live session with one of your contacts. The
+                  conversations will be hold only end-to-end.
+                </p>
+              </div>
+              <div class="level">
+                <div class="level-left">
+                  <div class="level-item"></div>
+                </div>
+                <div class="level-right">
+                  <div class="level-item">
+                    <b-field class="is-grouped is-grouped-right">
+                      <div class="control">
+                        <b-button
+                          tag="router-link"
+                          type="is-primary"
+                          icon-left="reply"
+                          :to="{
+                            name: 'r-id',
+                            params: { id: generateRoomID() },
+                          }"
+                        >
+                          Create room
+                        </b-button>
+                      </div>
+                    </b-field>
+                  </div>
+                </div>
+              </div></b-tab-item>-->
+          </b-tabs>
+        </div>
+        <div class="white pt-2">
+          <nav class="level">
+            <!-- Left side -->
+            <div class="level-left">
+              <div class="level-item">
+                <div class="icon-text">
+                  <span class="icon"><i class="mdi mdi-lock-outline"></i></span>
+                  <span>End-to-end encrypted</span>
+                </div>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import { ValidationProvider, ValidationObserver } from 'vee-validate'
+import { ToastProgrammatic as Toast } from 'buefy'
+import { mapState } from 'vuex'
+
+import { customAlphabet } from 'nanoid'
+import { nolookalikes } from 'nanoid-dictionary'
+
+import {
+  uniqueNamesGenerator,
+  adjectives,
+  colors,
+  animals,
+} from 'unique-names-generator'
+
+export default {
+  name: 'Home',
+  layout: 'hero',
+  components: {
+    ValidationProvider,
+    ValidationObserver,
+  },
+  data() {
+    return {
+      activeTab: 0,
+      radio: 'none',
+      isOpen: false,
+      isOpenFile: false,
+      toastText: 'You just copied the secret link!',
+      form: {
+        email: {
+          value: '',
+        },
+        secret: {
+          value: '',
+        },
+        passphrase: {
+          value: '',
+        },
+        webhook: {
+          value: '',
+        },
+        expiresAt: {
+          value: '24h',
+        },
+        revealOnce: {
+          value: true,
+        },
+      },
+      fieldMessages: {
+        secret:
+          'The secret will be encrypted client-side and only the cipher and meta information will be stored safe until it gets deleted. The key will not be stored anywhere but added only to the link.',
+      },
+      file: null,
+    }
+  },
+  computed: {
+    ...mapState({
+      policySetting: (state) => {
+        return state.policySetting
+      },
+    }),
+  },
+  methods: {
+    generateRoomID() {
+      const randomName = uniqueNamesGenerator({
+        dictionaries: [adjectives, colors, animals],
+        separator: '-',
+      }) // big_red_donkey
+      const nanoid = customAlphabet(nolookalikes, 8)
+      return randomName + '@' + nanoid()
+    },
+    onCreateSecret() {
+      this.$refs.form.validate().then((success) => {
+        if (!success) {
+          return
+        }
+        this.createSecret()
+      })
+    },
+    onCreateSecretFile() {
+      this.$refs.formFile.validate().then((success) => {
+        if (!success) {
+          return
+        }
+        this.createSecret()
+      })
+    },
+    async createSecret() {
+      let passphrase = this.form.passphrase.value
+      let cipher = this.form.secret.value
+      window.localStorage.setItem('email', this.form.email.value)
+
+      // Hash passphrase if present
+      if (passphrase) {
+        passphrase = this.$crypto.createHashWithoutPadding(passphrase)
+      }
+
+      // Client encryption
+      const key = await this.$crypto.generateEncryptionKeyString()
+
+      // Handle file input
+      let fileIdentifier
+      if (this.file) {
+        let fileCipher = this.file
+        if (passphrase) {
+          fileCipher = await this.$crypto.encryptFile(fileCipher, passphrase)
+        }
+        const encryptedFile = await this.$crypto.encryptFile(fileCipher, key)
+
+        const formData = new FormData()
+        formData.append('Content-type', 'application/octet-stream')
+        formData.append('file', encryptedFile)
+
+        // Upload file
+        const res = await this.$repositories.file
+          .upload(this.file.name, this.file.size, this.file.type, formData)
+          .catch((e) => {
+            Toast.open({
+              message:
+                'Error while trying to upload file: ' + e.response.data.error,
+              type: 'is-danger',
+            })
+          })
+        if (res) {
+          const { status, data } = res
+          if (status === 200 && data) {
+            fileIdentifier = data.data.identifier
+          }
+        } else {
+          return
+        }
+
+        // Prepare meta information for cipher since it is a shared file
+        cipher = JSON.stringify({
+          text: cipher,
+          file_id: fileIdentifier,
+        })
+      }
+
+      if (cipher) {
+        if (passphrase) {
+          cipher = await this.$crypto.encryptString(cipher, passphrase)
+        }
+        cipher = await this.$crypto.encryptString(cipher, key)
+
+        // Create secret
+        const res = await this.$repositories.secret
+          .create(
+            cipher,
+            this.form.expiresAt.value,
+            this.form.revealOnce.value,
+            !!passphrase,
+            fileIdentifier,
+            this.form.email.value,
+            this.form.email.webhookAddr
+          )
+          .catch((e) => {
+            console.log(e)
+          })
+        if (res) {
+          const { status, data } = res
+          if (status === 200 && data) {
+            // Change route
+            this.$router.push({
+              name: 'created',
+              params: {
+                link: `${this.$config.uiURL}/s/${data.data.identifier}#${key}`,
+                expiresAt: this.form.expiresAt.value,
+                passphrase,
+                revealOnce: this.form.revealOnce.value,
+              },
+            })
+          }
+        }
+      } else {
+        Toast.open({
+          message: 'Something went wrong while preparing the cipher',
+          type: 'is-danger',
+        })
+      }
+    },
+  },
+  mounted() {
+    // Track
+    this.$track.pageview({})
+  },
+  head() {
+    return {
+      title: 'Home - Secretify',
+    }
+  },
+}
+</script>
