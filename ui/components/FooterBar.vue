@@ -4,13 +4,20 @@
       <div class="container">
         <div class="level">
           <div class="level-left">
-            <div class="level-item">
+            <div class="level-item pr-3">
               <div class="footer-copyright">
                 <div>
                   &copy;
                   <a href="https://www.secretify.io">secretify.io</a> by
                   <a href="https://github.com/DarioCalovic">Dario Calovic</a>,
                   {{ year }} under GNU license . Build with a lot of coffee ☕.
+                  <span v-if="metaSetting && metaSetting.hoster.name">
+                    Hosted by
+                    <a :href="metaSetting.hoster.address">{{
+                      metaSetting.hoster.name
+                    }}</a
+                    >.
+                  </span>
                 </div>
               </div>
             </div>
@@ -39,17 +46,6 @@
                 ><b-icon icon="github-circle"> </b-icon
               ></a>
             </p>
-          </div>
-        </div>
-        <div class="level">
-          <div class="level-item">
-            <div v-if="metaSetting && metaSetting.hoster.name">
-              Instance hosted by
-              <a :href="metaSetting.hoster.address">{{
-                metaSetting.hoster.name
-              }}</a
-              >.
-            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 package secret
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 )
 
 // Create creates a new encrypted secret
-func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, fileID int, email string, webhookAddr string) (secretify.Secret, error) {
+func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileID int, email string, webhookAddr string) (secretify.Secret, error) {
 	identifier, err := nanoid.GenerateIdentifier(s.cfgSvc.Policy().Identifier.Size)
 	if err != nil {
 		return secretify.Secret{}, err
@@ -22,6 +23,7 @@ func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Ti
 		Cipher:        ciphertext,
 		ExpiresAt:     expiresAt,
 		RevealOnce:    revealOnce,
+		DestroyManual: destroyManual,
 		Email:         email,
 		WebhookAddr:   webhookAddr,
 		HasPassphrase: hasPassphrase,
@@ -63,12 +65,12 @@ func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Ti
 }
 
 // Create creates a new encrypted secret with an encrypted file
-func (s *Secret) CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, fileIdentifier string, email string, webhookAddr string) (secretify.Secret, error) {
+func (s *Secret) CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileIdentifier string, email string, webhookAddr string) (secretify.Secret, error) {
 	file, err := s.fileSvc.Repo().ViewByIdentifier(s.db, fileIdentifier)
 	if err != nil {
 		return secretify.Secret{}, err
 	}
-	return s.Create(ciphertext, hasPassphrase, expiresAt, revealOnce, file.ID, email, webhookAddr)
+	return s.Create(ciphertext, hasPassphrase, expiresAt, revealOnce, destroyManual, file.ID, email, webhookAddr)
 }
 
 func sendEmail() {
@@ -155,6 +157,9 @@ func (s *Secret) Delete(identifier string) error {
 	secret, err := s.repo.ViewByIdentifier(s.db, identifier)
 	if err != nil {
 		return err
+	}
+	if !secret.DestroyManual {
+		return errors.New("destroying manually is disabled for this secret")
 	}
 	if secret.FileID > 0 {
 		err = s.fileSvc.Repo().Delete(s.db, secret.File.Identifier)

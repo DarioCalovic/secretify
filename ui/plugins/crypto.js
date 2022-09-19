@@ -1,6 +1,7 @@
 import { customAlphabet } from 'nanoid'
 import { nolookalikes } from 'nanoid-dictionary'
-import { enc, SHA256 } from 'crypto-js'
+import base64url from 'base64url'
+const cryptoPkg = require('crypto')
 
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
@@ -123,7 +124,8 @@ export const createHashWithoutPadding = (val) => {
 }
 
 export const createHash = (val) => {
-  return enc.Base64.stringify(SHA256(val))
+  const hash = cryptoPkg.createHash('sha256').update(Buffer.from(val)).digest()
+  return base64url.encode(hash)
 }
 
 export default (ctx, inject) => {

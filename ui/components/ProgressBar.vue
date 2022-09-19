@@ -60,8 +60,9 @@ function createProgressbar(id, duration, callback) {
 
 export default {
   name: 'ProgressBar',
+  props: ['duration'],
   mounted() {
-    createProgressbar('progressbar1', '30s', function () {
+    createProgressbar('progressbar1', this.duration, function () {
       window.location.reload(true)
     })
   },

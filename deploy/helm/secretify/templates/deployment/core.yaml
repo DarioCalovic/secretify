@@ -1,0 +1,68 @@
+{{ if .Values.core.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "secretify.fullname" . }}.core
+  labels:
+    {{- include "secretify.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "secretify.fullname" . }}.core
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        app: {{ include "secretify.fullname" . }}.core
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "secretify.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}.core
+          image: "{{ .Values.image.registry }}{{ .Values.core.registry.image }}:{{ .Values.core.registry.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.core.resources | nindent 12 }}
+          ports:
+          - containerPort: 80
+          env:
+            - name: NAME
+              value: core.core
+            - name: BASEPATH
+              value: "{{ .Values.core.ingress.path }}" 
+            - name:.coreKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "secretify.fullname" . }}.corekey
+                  key:.corekey
+      {{ if .Values.hive.tls.enabled }} 
+            - name: SERVERROOTCA
+              value: /etc/tls/ca.crt
+          volumeMounts:
+            - name: secretify.servercert
+              mountPath: /etc/tls
+      volumes:
+        - name: secretify.servercert 
+          secret:
+            secretName: {{ include "secretify.fullname" . }}-servercert
+      {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }} 
+{{ end }}

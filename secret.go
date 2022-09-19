@@ -11,6 +11,7 @@ type Secret struct {
 	ExpiresAt     time.Time
 	HasPassphrase bool
 	RevealOnce    bool
+	DestroyManual bool
 	FileID        int
 	File          File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

@@ -25,6 +25,7 @@ type Config struct {
 	ReadTimeoutSeconds  int
 	WriteTimeoutSeconds int
 	Debug               bool
+	CORSAllowedOrigins  []string
 }
 
 // Start starts mux server
@@ -32,7 +33,7 @@ func Start(r *mux.Router, cfg *Config) {
 	// TODO : make configurable
 	cors := handlers.CORS(
 		handlers.AllowedHeaders([]string{"content-type"}),
-		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedOrigins(cfg.CORSAllowedOrigins),
 		handlers.AllowCredentials(),
 		handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "DELETE"}),
 	)

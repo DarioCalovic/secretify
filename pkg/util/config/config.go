@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"github.com/DarioCalovic/secretify"
 	flag "github.com/itdistrict/flag"
@@ -43,17 +44,27 @@ type Policy struct {
 		Enabled bool `json:"enabled"`
 	} `json:"webhook"`
 	Secret struct {
-		MaxLength int `json:"max_length"`
+		MaxLength      int    `json:"max_length"`
+		RevealDuration string `json:"reveal_duration"`
 	} `json:"secret"`
 	Passphrase struct {
 		Required bool `json:"required"`
 	} `json:"passphrase"`
 	Storage struct {
+		Enabled    bool `json:"enabled"`
 		FileSystem struct {
 			MaxFileSize           uint   `json:"max_filesize"`
 			AllowedFileExtensions string `json:"allowed_file_extensions"`
 		} `json:"filesystem"`
 	} `json:"storage"`
+	Security Security `json:"security"`
+}
+
+type Security struct {
+	CORS struct {
+		allowedOrigins string
+		AllowedOrigins []string `json:"allowed_origins"`
+	} `json:"cors"`
 }
 
 type Server struct {
@@ -84,6 +95,7 @@ type Database struct {
 }
 
 type Storage struct {
+	Enabled    bool       `json:"enabled"`
 	Provider   string     `json:"provider"`
 	FileSystem FileSystem `json:"filesystem"`
 }
@@ -125,7 +137,7 @@ func ParseFlags(fs *flag.FlagSet) *Configuration {
 	cfg := NewConfiguration()
 
 	// Database
-	fs.StringVar(&cfg.DB.ConnectionURL, "Database_ConnectionURL", "secretify.db", "The sqlite database connection url string (path to database file)")
+	fs.StringVar(&cfg.DB.ConnectionURL, "Database_ConnectionURL", "./db/secretify.db", "The sqlite database connection url string (path to database file)")
 
 	// Storage
 	fs.StringVar(&cfg.Storage.Provider, "Storage_Provider", "filesystem", "Storage provider name")
@@ -140,24 +152,32 @@ func ParseFlags(fs *flag.FlagSet) *Configuration {
 
 	// Policy
 	fs.IntVar(&cfg.Policy.Identifier.Size, "Policy_Identifier_Size", 18, "Size of the identifier")
-	fs.BoolVar(&cfg.Policy.Mail.Enabled, "Policy_Mail_Enabled", true, "Enable sending emails or not")
+	fs.BoolVar(&cfg.Policy.Mail.Enabled, "Policy_Mail_Enabled", false, "Enable sending emails or not")
 	fs.BoolVar(&cfg.Policy.Webhook.Enabled, "Policy_Webhook_Enabled", true, "Enable issueing webhooks")
 	fs.IntVar(&cfg.Policy.Secret.MaxLength, "Policy_Secret_MaxLength", 500, "Secret's max length")
+	fs.StringVar(&cfg.Policy.Secret.RevealDuration, "Policy_Secret_RevealDuration", "60s", "Amount of time the secret will be shown when revealing on the UI")
 	fs.BoolVar(&cfg.Policy.Passphrase.Required, "Policy_Passphrase_Required", false, "Passphrase required or not")
+	fs.BoolVar(&cfg.Policy.Storage.Enabled, "Policy_Storage_Enabled", false, "Enable sharing files")
 	fs.UintVar(&cfg.Policy.Storage.FileSystem.MaxFileSize, "Policy_Storage_Filesystem_MaxFileSize", secretify.MaxFileSize, "Storage max size per file")
 	fs.StringVar(&cfg.Policy.Storage.FileSystem.AllowedFileExtensions, "Policy_Storage_Filesystem_AllowedFileExtensions", secretify.AllowedFileExtensions, "Allowed file extensions (comma separated), leave empty if all types should be allowed")
+
+	// Policy Security
+	fs.StringVar(&cfg.Policy.Security.CORS.allowedOrigins, "Policy_Security_CORS_AllowedOrigins", "*", "Set CORS AllowedOrigins settings for security reasons (comma separated)")
 
 	// Meta
 	fs.StringVar(&cfg.Meta.Hoster.Name, "Meta_Hoster_Name", "", "Meta information about the hoster name")
 	fs.StringVar(&cfg.Meta.Hoster.Address, "Meta_Hoster_Address", "", "Meta information about the hoster address")
 
 	// SMTP
-	fs.StringVar(&cfg.SMTP.MailJet.APIKeyPublic, "SMTP_MailJet_APIKey_Public", "c4bf39bd29338413af37451bbd2ac507", "MailJet public api key")
-	fs.StringVar(&cfg.SMTP.MailJet.APIKeyPrivate, "SMTP_MailJet_APIKey_Private", "ebf4d1945f419fb055b003b157b126a0", "MailJet private api key")
+	fs.StringVar(&cfg.SMTP.MailJet.APIKeyPublic, "SMTP_MailJet_APIKey_Public", "", "MailJet public api key")
+	fs.StringVar(&cfg.SMTP.MailJet.APIKeyPrivate, "SMTP_MailJet_APIKey_Private", "", "MailJet private api key")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		os.Exit(1)
 	}
+
+	// Transform some parameters
+	cfg.Policy.Security.CORS.AllowedOrigins = strings.Split(cfg.Policy.Security.CORS.allowedOrigins, ",")
 
 	return cfg
 }

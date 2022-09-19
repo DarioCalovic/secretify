@@ -13,8 +13,8 @@ import (
 
 // Service represents secret application interface
 type Service interface {
-	Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, fileID int, email string, webhookAddr string) (secretify.Secret, error)
-	CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, fileIdentifier string, email string, webhookAddr string) (secretify.Secret, error)
+	Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileID int, email string, webhookAddr string) (secretify.Secret, error)
+	CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileIdentifier string, email string, webhookAddr string) (secretify.Secret, error)
 	View(identifier string, onlyMeta bool) (secret secretify.Secret, deleted bool, err error)
 	Delete(identifier string) error
 	DeleteExpired() error

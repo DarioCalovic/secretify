@@ -6,3 +6,4 @@ ui/package-lock.json
 socket/
 secretify.db
 docker-compose*
+db/secretify.db

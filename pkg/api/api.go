@@ -35,6 +35,14 @@ func Start(cfg *utilconfig.Configuration, db utildb.DB, mailer *mail.Mailer) err
 	r.Use(loggingMiddleware)
 	s := r.PathPrefix(fmt.Sprintf("%s/%s/%s", cfg.Server.BasePath, "api", apiVersion)).Subrouter()
 
+	// Status
+	{
+		s.HandleFunc("", status).
+			Methods("GET")
+		s.HandleFunc("/healthz", status).
+			Methods("GET")
+	}
+
 	// Protected
 	var (
 		sec            = secure.New(sha1.New())
@@ -61,6 +69,7 @@ func Start(cfg *utilconfig.Configuration, db utildb.DB, mailer *mail.Mailer) err
 		ReadTimeoutSeconds:  cfg.Server.ReadTimeout,
 		WriteTimeoutSeconds: cfg.Server.WriteTimeout,
 		Debug:               cfg.Server.Debug,
+		CORSAllowedOrigins:  cfg.Policy.Security.CORS.AllowedOrigins,
 	})
 	return nil
 }
@@ -71,4 +80,9 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	})
+}
+
+func status(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 }

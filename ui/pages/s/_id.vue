@@ -49,7 +49,10 @@
               </h3>
               <h3 class="subtitle is-3">The secret is revealed.</h3>
               <div class="card mt-6">
-                <progress-bar v-if="secret.revealOnce" />
+                <progress-bar
+                  v-if="secret.revealOnce"
+                  :duration="policySetting.secret.reveal_duration"
+                />
                 <div class="card-content">
                   <div class="content">
                     <div v-if="secret.file.identifier">
@@ -96,6 +99,8 @@
                     <cb-textarea
                       v-else
                       :text="decryptedValue"
+                      :first="decryptedValueFirst"
+                      :rest="decryptedValueRest"
                       toastText="You just copied the secret!"
                     />
                     <nav class="level">
@@ -105,7 +110,7 @@
                       <!-- Right side -->
                       <div class="level-right buttons">
                         <b-button
-                          v-if="!secret.revealOnce"
+                          v-if="!secret.revealOnce && secret.destroyManual"
                           type="is-text"
                           @click="destroySecret"
                         >
@@ -119,10 +124,21 @@
                           v-clipboard:copy="decryptedValue"
                           v-clipboard:success="onCopy"
                         >
-                          Copy
+                          <template v-if="!decryptedValueFirst">Copy</template
+                          ><template v-else>Copy all</template>
                         </b-button>
                         <b-button
-                          v-else
+                          v-if="!secret.file.identifier && decryptedValueFirst"
+                          class="withIcon"
+                          icon-left="content-copy"
+                          type="is-primary"
+                          v-clipboard:copy="decryptedValueFirst"
+                          v-clipboard:success="onCopy"
+                        >
+                          Copy first line
+                        </b-button>
+                        <b-button
+                          v-if="secret.file.identifier"
                           class="withIcon"
                           icon-left="file-download"
                           type="is-primary"
@@ -175,6 +191,7 @@
 </template>
 <script>
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
+import { mapState } from 'vuex'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import CbTextarea from '@/components/CbTextarea'
@@ -189,6 +206,13 @@ export default {
     ProgressBar,
     ValidationProvider,
     ValidationObserver,
+  },
+  computed: {
+    ...mapState({
+      policySetting: (state) => {
+        return state.policySetting
+      },
+    }),
   },
   async asyncData({ error, params, $repositories }) {
     const res = await $repositories.secret.view(params.id).catch((err) => {
@@ -206,6 +230,7 @@ export default {
             valid: true,
             expires_at: data.data.expires_at,
             revealOnce: data.data.reveal_once,
+            destroyManual: data.data.destroy_manual,
             hasPassphrase: data.data.has_passphrase,
             deleted: data.data.deleted,
             file: data.data.file,
@@ -225,6 +250,8 @@ export default {
         passphrase: '',
       },
       decryptedValue: '',
+      decryptedValueFirst: '',
+      decryptedValueRest: '',
       encryptionKey: '',
       toastText: 'You just copied the secret!',
     }
@@ -349,6 +376,13 @@ export default {
           }
         } else {
           this.decryptedValue = decrypted
+          if (/\r|\n/.exec(this.decryptedValue)) {
+            const parts = this.decryptedValue.split('\n')
+            this.decryptedValueFirst = parts[0]
+            if (parts.length > 1) {
+              this.decryptedValueRest = '\n' + parts.slice(1).join('\n')
+            }
+          }
         }
       }
       this.reveal = true

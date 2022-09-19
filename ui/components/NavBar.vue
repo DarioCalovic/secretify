@@ -21,6 +21,9 @@
         <b-navbar-item tag="router-link" :to="{ path: '/about' }">
           About
         </b-navbar-item>
+        <b-navbar-item v-if="$config.branding.logo" tag="div"
+          ><img :src="$config.branding.logo"
+        /></b-navbar-item>
       </template>
     </b-navbar>
   </div>

@@ -1,0 +1,42 @@
+{{ if .Values.core.enabled }}
+{{- if .Values.core.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ template "secretify.fullname" . }}-core
+  labels:
+    {{- include "secretify.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{ with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{ end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.core.ingress.host | quote }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.core.ingress.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.core.ingress.path.api | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "secretify.fullname" . }}-core
+                port:
+                  number: 8800
+          - path: {{ .Values.core.ingress.path.ui | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "secretify.fullname" . }}-core
+                port:
+                  number: 3000
+  {{- end }}
+  {{ end }}

@@ -67,8 +67,10 @@ $colors: mergeColorMaps(
 $base-color: #292d34;
 $base-color-light: rgba(24, 28, 33, 0.06);
 
+
 /* General overrides */
-$body-background-color: #0862ff;
+// $body-background-color: #0862ff;
+$body-background-color: var(--main-bg-color, #0862ff);
 $title-size: $size-1;
 
 /* NavBar: specifics */

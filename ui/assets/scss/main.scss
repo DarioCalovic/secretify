@@ -7,6 +7,11 @@
 /* Theme components */
 @import "nav-bar";
 @import "footer";
+@import "error";
+
+html {
+    display: none;
+} 
 
 .card {
     border-radius: 4px;
@@ -131,7 +136,9 @@ nav.tabs {
 }
 
 .textarea:not([rows]) {
+    resize: none;
     min-height: 12em;
+    max-height: 36em;
 }
 
 .file--block .textarea:not([rows]) {
@@ -143,6 +150,10 @@ nav.tabs {
 
 .tabs li.is-active {
     font-weight: 500;
+}
+
+.tabs li.is-active a {
+    color: $body-background-color !important;
 }
 
 .upload .upload-draggable.is-danger,

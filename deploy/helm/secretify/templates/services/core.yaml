@@ -1,0 +1,19 @@
+{{ if .Values.core.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "secretify.fullname" . }}-core
+  labels:
+    {{- include "secretify.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector: 
+    app: {{ include "secretify.fullname" . }}-core
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8800
+    - name: http
+      protocol: TCP
+      port: 3000
+{{ end }}

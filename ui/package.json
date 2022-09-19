@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.13.6",
+    "base64url": "^3.0.1",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.10.7",
+    "generate-password": "^1.7.0",
     "nanoid-dictionary": "^4.3.0",
     "nuxt": "^2.15.8",
     "nuxt-buefy": "^0.4.18",

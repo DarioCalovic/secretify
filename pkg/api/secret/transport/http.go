@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/DarioCalovic/secretify"
@@ -44,6 +45,7 @@ type createReq struct {
 	Cipher         string `json:"cipher"`
 	ExpiresAt      string `json:"expires_at"`
 	RevealOnce     bool   `json:"reveal_once"`
+	DestroyManual  bool   `json:"destroy_manual"`
 	HasPassphrase  bool   `json:"has_passphrase"`
 	FileIdentifier string `json:"file_identifier"`
 	Email          string `json:"email"`
@@ -83,13 +85,30 @@ func (h *HTTP) create(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	et, err := time.ParseDuration(cr.ExpiresAt)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode(secretify.HTTPErrorResponse{
-			Error: err.Error(),
-		})
-		return
+	var expires time.Time
+	{
+		et, err := time.ParseDuration(cr.ExpiresAt)
+		if err == nil {
+			expires = time.Now().Add(et)
+		} else {
+			i, err := strconv.ParseInt(cr.ExpiresAt, 10, 64)
+			if err != nil {
+				w.WriteHeader(http.StatusNotAcceptable)
+				json.NewEncoder(w).Encode(secretify.HTTPErrorResponse{
+					Error: err.Error(),
+				})
+				return
+			}
+			expires = time.Unix(i, 0)
+		}
+		// check if date is in future
+		if expires.Before(time.Now()) {
+			w.WriteHeader(http.StatusNotAcceptable)
+			json.NewEncoder(w).Encode(secretify.HTTPErrorResponse{
+				Error: errors.New("expires_at needs to be in future").Error(),
+			})
+			return
+		}
 	}
 
 	// Create secret
@@ -97,9 +116,9 @@ func (h *HTTP) create(w http.ResponseWriter, r *http.Request) {
 		scr secretify.Secret
 	)
 	if cr.FileIdentifier == "" {
-		scr, err = h.svc.Create(cr.Cipher, cr.HasPassphrase, time.Now().Add(et), cr.RevealOnce, 0, cr.Email, cr.WebhookAddr)
+		scr, err = h.svc.Create(cr.Cipher, cr.HasPassphrase, expires, cr.RevealOnce, cr.DestroyManual, 0, cr.Email, cr.WebhookAddr)
 	} else {
-		scr, err = h.svc.CreateWithFile(cr.Cipher, cr.HasPassphrase, time.Now().Add(et), cr.RevealOnce, cr.FileIdentifier, cr.Email, cr.WebhookAddr)
+		scr, err = h.svc.CreateWithFile(cr.Cipher, cr.HasPassphrase, expires, cr.RevealOnce, cr.DestroyManual, cr.FileIdentifier, cr.Email, cr.WebhookAddr)
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
@@ -124,6 +143,7 @@ type viewRes struct {
 	ExpiresAt     time.Time `json:"expires_at"`
 	HasPassphrase bool      `json:"has_passphrase"`
 	RevealOnce    bool      `json:"reveal_once"`
+	DestroyManual bool      `json:"destroy_manual"`
 	Deleted       bool      `json:"deleted"`
 	File          struct {
 		Identifier string `json:"identifier"`
@@ -165,6 +185,7 @@ func (h *HTTP) view(w http.ResponseWriter, r *http.Request) {
 			ExpiresAt:     secret.ExpiresAt,
 			HasPassphrase: secret.HasPassphrase,
 			RevealOnce:    secret.RevealOnce,
+			DestroyManual: secret.DestroyManual,
 			Deleted:       deleted,
 			File: struct {
 				Identifier string `json:"identifier"`

@@ -106,6 +106,13 @@ export default {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {
+    loaders: {
+      sass: {
+        additionalData: `
+        $body-background-color: #e3000b;
+      `
+      }
+    },
     /*
      ** You can extend webpack config here
      */
@@ -124,6 +131,10 @@ export default {
     apiURL: process.env.API_URL || 'http://localhost:8800/api/v1',
     uiURL: process.env.UI_URL || 'http://localhost:3000',
     apiKey: process.env.API_KEY || '',
+    branding: {
+      primary_color: process.env.BRANDING_PRIMARY_COLOR || '#0862ff',
+      logo: process.env.BRANDING_LOGO || ''
+    },
     track: {
       enabled: process.env.TRACK_ENABLED || false,
       domain: process.env.TRACK_PLAUSIBLE_DOMAIN || 'localhost:3000',

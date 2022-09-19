@@ -25,7 +25,10 @@
                         v-model="form.secret.value"
                         :maxlength="policySetting.secret.max_length"
                         type="textarea"
+                        class="autosize"
+                        id="secretTextarea"
                         placeholder="Tell me a secret.."
+                        v-on:input="autoresize"
                       ></b-input>
                     </b-field>
                   </ValidationProvider>
@@ -83,6 +86,14 @@
                         >
                           <b-switch v-model="form.revealOnce.value"
                             >Reveal secret only once</b-switch
+                          >
+                        </b-field>
+                        <b-field
+                          v-show="!form.revealOnce.value"
+                          message="Disabled, the secret will be deleted automatically when it expires."
+                        >
+                          <b-switch v-model="form.destroyManual.value"
+                            >Secret can be destroyed manually</b-switch
                           >
                         </b-field>
                         <!--
@@ -152,6 +163,14 @@
                         >
                         </b-icon>
                       </div>
+                      <div class="level-item">
+                        <b-icon
+                          class="action-icon"
+                          icon="shuffle-variant"
+                          @click.native="shuffleSecret"
+                        >
+                        </b-icon>
+                      </div>
                     </div>
                     <div class="level-right">
                       <div class="level-item">
@@ -182,7 +201,7 @@
                 </form>
               </ValidationObserver>
             </b-tab-item>
-            <b-tab-item label="File">
+            <b-tab-item v-if="policySetting.storage.enabled" label="File">
               <ValidationObserver ref="formFile">
                 <form @submit.prevent="onCreateSecretFile">
                   <ValidationProvider
@@ -407,6 +426,8 @@ import {
   animals,
 } from 'unique-names-generator'
 
+const generator = require('generate-password')
+
 export default {
   name: 'Home',
   layout: 'hero',
@@ -440,6 +461,9 @@ export default {
         revealOnce: {
           value: true,
         },
+        destroyManual: {
+          value: true,
+        },
       },
       fieldMessages: {
         secret:
@@ -456,6 +480,22 @@ export default {
     }),
   },
   methods: {
+    autoresize() {
+      const element = document.getElementById('secretTextarea')
+      element.style.height = '5px'
+      element.style.height = element.scrollHeight + 2 + 'px'
+    },
+    shuffleSecret() {
+      const password = generator.generate({
+        length: 30,
+        numbers: true,
+        symbols: true,
+        lowercase: true,
+        uppercase: true,
+        strict: true,
+      })
+      this.form.secret.value = password
+    },
     generateRoomID() {
       const randomName = uniqueNamesGenerator({
         dictionaries: [adjectives, colors, animals],
@@ -544,6 +584,7 @@ export default {
             cipher,
             this.form.expiresAt.value,
             this.form.revealOnce.value,
+            this.form.destroyManual.value,
             !!passphrase,
             fileIdentifier,
             this.form.email.value,

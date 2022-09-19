@@ -1,5 +1,9 @@
 <template>
-  <div class="dark mb-3">{{ text }}</div>
+  <div class="dark mb-3" v-if="first">
+    <span class="first">{{ first }}</span
+    ><span>{{ rest }}</span>
+  </div>
+  <div class="dark mb-3" v-else>{{ text }}</div>
 </template>
 <style>
 .dark {
@@ -8,12 +12,15 @@
   font-size: 1.2rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: pre;
 }
 </style>
 <script>
 export default {
   props: {
     text: String,
+    first: String,
+    rest: String,
   },
 }
 </script>
