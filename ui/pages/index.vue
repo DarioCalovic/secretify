@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <div class="columns is-vcentered is-centered dotted">
+      <div class="shape"></div>
       <div class="column is-12">
         <h2 class="title is-1">The safe way to share secrets</h2>
         <h3 class="subtitle is-3">
@@ -22,13 +23,13 @@
                       "
                     >
                       <b-input
+                        id="secretTextarea"
                         v-model="form.secret.value"
                         :maxlength="policySetting.secret.max_length"
                         type="textarea"
                         class="autosize"
-                        id="secretTextarea"
                         placeholder="Tell me a secret.."
-                        v-on:input="autoresize"
+                        @input="autoresize"
                       ></b-input>
                     </b-field>
                   </ValidationProvider>
@@ -42,18 +43,11 @@
                       :required="policySetting.passphrase.required"
                     ></b-input>
                   </b-field>
-                  <b-field
-                    v-show="false"
-                    label="Email (not working yet)"
-                    message="Your email address is used only for security reasons. This will also allow us to send you a copy of the link and notify you when somebody reveals the secret."
-                  >
-                    <b-input type="email" placeholder="Your email"></b-input>
-                  </b-field>
                   <b-field>
                     <b-collapse
+                      v-model="isOpen"
                       aria-id="collapseAddInfos"
                       animation="slide"
-                      v-model="isOpen"
                     >
                       <div>
                         <b-field
@@ -96,60 +90,7 @@
                             >Secret can be destroyed manually</b-switch
                           >
                         </b-field>
-                        <!--
-                      <b-field label="Notify (coming soon)">
-                        <b-radio
-                          v-model="radio"
-                          name="name"
-                          native-value="none"
-                        >
-                          None
-                        </b-radio>
-                        <b-radio
-                          v-model="radio"
-                          name="name"
-                          native-value="email"
-                          disabled
-                        >
-                          Email
-                        </b-radio>
-                        <b-radio
-                          v-model="radio"
-                          name="name"
-                          native-value="webhook"
-                          disabled
-                        >
-                          Webhook
-                        </b-radio>
-                      </b-field>
-                      <b-field
-                        v-show="
-                          this.policySetting.webhook.enabled &&
-                          radio == 'webhook'
-                        "
-                        label="Webhook"
-                        message="Notify a web service once a secret was created or revealed."
-                      >
-                        <b-input
-                          v-model="form.webhook.value"
-                          type="text"
-                        ></b-input>
-                      </b-field>
-                      <b-field
-                        v-show="
-                          this.policySetting.mail.enabled && radio == 'email'
-                        "
-                        label="Email"
-                        message="Get notified via email as soon as someone reveals the secret."
-                      >
-                        <b-input
-                          v-model="form.email.value"
-                          type="text"
-                          disabled
-                        ></b-input>
-                      </b-field>
-                      
-                      --></div>
+                      </div>
                     </b-collapse>
                   </b-field>
 
@@ -177,23 +118,9 @@
                         <b-field class="is-grouped is-grouped-right">
                           <div class="control">
                             <b-button native-type="submit" type="is-primary"
-                              >Create secret</b-button
+                              >Create secret link</b-button
                             >
                           </div>
-                          <!--
-                    <div class="control">
-                      <nuxt-link
-                        class="button is-primary"
-                        :to="{
-                          name: 'transfer',
-                          params: {
-                            initiator: true,
-                            secret: form.secret.value,
-                          },
-                        }"
-                        >Transfer secret</nuxt-link
-                      >
-                    </div>-->
                         </b-field>
                       </div>
                     </div>
@@ -226,7 +153,7 @@
                         v-model="file"
                         drag-drop
                         expanded
-                        validationMessage="Please select a file"
+                        validation-message="Please select a file"
                         :type="errors.length > 0 ? 'is-danger' : ''"
                       >
                         <section class="section">
@@ -243,11 +170,11 @@
                                 }})
                               </p>
                               <p
-                                class="help"
                                 v-if="
                                   policySetting.storage.filesystem
                                     .allowed_file_extensions
                                 "
+                                class="help"
                               >
                                 Allowed file extensions are
                                 {{
@@ -267,9 +194,9 @@
                     > </ValidationProvider
                   ><b-field>
                     <b-collapse
+                      v-model="isOpenFile"
                       aria-id="collapseAddInfosFile"
                       animation="slide"
-                      v-model="isOpenFile"
                     >
                       <div class="file--block">
                         <b-field
@@ -278,23 +205,21 @@
                         >
                           <b-input
                             v-model="form.secret.value"
-                            :maxlength="
-                              this.policySetting.secret.max_length / 2
-                            "
+                            :maxlength="policySetting.secret.max_length / 2"
                             type="textarea"
                             placeholder=""
                             :required="false"
                           ></b-input>
                         </b-field>
                         <b-field
-                          v-show="!this.policySetting.passphrase.required"
+                          v-show="!policySetting.passphrase.required"
                           label="Passphrase"
                           message="Only the one with the passphrase can reveal the secret. Not even an administrator can restore it."
                         >
                           <b-input
                             v-model="form.passphrase.value"
                             type="password"
-                            :required="this.policySetting.passphrase.required"
+                            :required="policySetting.passphrase.required"
                           ></b-input>
                         </b-field>
                         <b-field
@@ -337,23 +262,9 @@
                         <b-field class="is-grouped is-grouped-right">
                           <div class="control">
                             <b-button native-type="submit" type="is-primary"
-                              >Create secret</b-button
+                              >Create secret link</b-button
                             >
                           </div>
-                          <!--
-                    <div class="control">
-                      <nuxt-link
-                        class="button is-primary"
-                        :to="{
-                          name: 'transfer',
-                          params: {
-                            initiator: true,
-                            secret: form.secret.value,
-                          },
-                        }"
-                        >Transfer secret</nuxt-link
-                      >
-                    </div>-->
                         </b-field>
                       </div>
                     </div>
@@ -361,40 +272,9 @@
                 </form>
               </ValidationObserver></b-tab-item
             >
-            <!--<b-tab-item label="Live"
-              ><div>
-                <p class="pb-4">
-                  Create a live session with one of your contacts. The
-                  conversations will be hold only end-to-end.
-                </p>
-              </div>
-              <div class="level">
-                <div class="level-left">
-                  <div class="level-item"></div>
-                </div>
-                <div class="level-right">
-                  <div class="level-item">
-                    <b-field class="is-grouped is-grouped-right">
-                      <div class="control">
-                        <b-button
-                          tag="router-link"
-                          type="is-primary"
-                          icon-left="reply"
-                          :to="{
-                            name: 'r-id',
-                            params: { id: generateRoomID() },
-                          }"
-                        >
-                          Create room
-                        </b-button>
-                      </div>
-                    </b-field>
-                  </div>
-                </div>
-              </div></b-tab-item>-->
           </b-tabs>
         </div>
-        <div class="white pt-2">
+        <div class="pt-2">
           <nav class="level">
             <!-- Left side -->
             <div class="level-left">
@@ -415,17 +295,6 @@
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { ToastProgrammatic as Toast } from 'buefy'
 import { mapState } from 'vuex'
-
-import { customAlphabet } from 'nanoid'
-import { nolookalikes } from 'nanoid-dictionary'
-
-import {
-  uniqueNamesGenerator,
-  adjectives,
-  colors,
-  animals,
-} from 'unique-names-generator'
-
 const generator = require('generate-password')
 
 export default {
@@ -443,16 +312,10 @@ export default {
       isOpenFile: false,
       toastText: 'You just copied the secret link!',
       form: {
-        email: {
-          value: '',
-        },
         secret: {
           value: '',
         },
         passphrase: {
-          value: '',
-        },
-        webhook: {
           value: '',
         },
         expiresAt: {
@@ -479,6 +342,10 @@ export default {
       },
     }),
   },
+  mounted() {
+    // Track
+    this.$track.pageview({})
+  },
   methods: {
     autoresize() {
       const element = document.getElementById('secretTextarea')
@@ -495,14 +362,6 @@ export default {
         strict: true,
       })
       this.form.secret.value = password
-    },
-    generateRoomID() {
-      const randomName = uniqueNamesGenerator({
-        dictionaries: [adjectives, colors, animals],
-        separator: '-',
-      }) // big_red_donkey
-      const nanoid = customAlphabet(nolookalikes, 8)
-      return randomName + '@' + nanoid()
     },
     onCreateSecret() {
       this.$refs.form.validate().then((success) => {
@@ -523,7 +382,6 @@ export default {
     async createSecret() {
       let passphrase = this.form.passphrase.value
       let cipher = this.form.secret.value
-      window.localStorage.setItem('email', this.form.email.value)
 
       // Hash passphrase if present
       if (passphrase) {
@@ -586,12 +444,13 @@ export default {
             this.form.revealOnce.value,
             this.form.destroyManual.value,
             !!passphrase,
-            fileIdentifier,
-            this.form.email.value,
-            this.form.email.webhookAddr
+            fileIdentifier
           )
-          .catch((e) => {
-            console.log(e)
+          .catch((err) => {
+            Toast.open({
+              message: err,
+              type: 'is-danger',
+            })
           })
         if (res) {
           const { status, data } = res
@@ -615,10 +474,6 @@ export default {
         })
       }
     },
-  },
-  mounted() {
-    // Track
-    this.$track.pageview({})
   },
   head() {
     return {

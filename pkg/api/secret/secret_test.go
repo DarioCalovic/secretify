@@ -14,11 +14,10 @@ import (
 
 func TestEncrypt(t *testing.T) {
 	type args struct {
-		email      string
-		secret     string
-		passphrase string
-		expiresAt  time.Time
-		revealOnce bool
+		cipher        string
+		hasPassphrase bool
+		expiresAt     time.Time
+		revealOnce    bool
 	}
 	cases := []struct {
 		name     string
@@ -30,11 +29,10 @@ func TestEncrypt(t *testing.T) {
 		name:    "Fail on is lower role",
 		wantErr: false,
 		args: args{
-			email:      "",
-			secret:     "",
-			passphrase: "",
-			expiresAt:  mock.TestTime(2021),
-			revealOnce: true,
+			cipher:        "client-generated-cipher",
+			hasPassphrase: false,
+			expiresAt:     mock.TestTime(2021),
+			revealOnce:    true,
 		},
 		sdb: &mockdb.Secret{
 			CreateFn: func(db utildb.DB, secret secretify.Secret) (secretify.Secret, error) {
@@ -51,7 +49,7 @@ func TestEncrypt(t *testing.T) {
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			s := secret.New(nil, tt.sdb, nil, nil)
-			usr, err := s.Create(tt.args.email, tt.args.secret, tt.args.passphrase, tt.args.expiresAt, tt.args.revealOnce)
+			usr, err := s.Create(tt.args.cipher, tt.args.hasPassphrase, tt.args.expiresAt, tt.args.revealOnce, false, 0)
 			assert.Equal(t, tt.wantErr, err != nil)
 			if tt.wantData != nil {
 				assert.Equal(t, tt.wantData, usr)

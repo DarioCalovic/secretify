@@ -7,8 +7,6 @@ export default ($axios, apiURL) => ({
     destroyManual,
     hasPassphrase,
     fileIdentifier,
-    email,
-    webhookAddr
   ) {
     return $axios.post(
       `${apiURL}/${resource}`,
@@ -19,8 +17,6 @@ export default ($axios, apiURL) => ({
         destroy_manual: destroyManual,
         has_passphrase: hasPassphrase,
         file_identifier: fileIdentifier,
-        email,
-        webhook_addr: webhookAddr,
       },
       {
         headers: {},

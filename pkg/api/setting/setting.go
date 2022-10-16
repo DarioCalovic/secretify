@@ -18,3 +18,8 @@ func (s *Setting) Policy() utilconfig.Policy {
 func (s *Setting) Storage() utilconfig.Storage {
 	return *s.cfg.Storage
 }
+
+// Outlook returns storage information
+func (s *Setting) Outlook() utilconfig.Outlook {
+	return *s.cfg.Outlook
+}

@@ -8,11 +8,10 @@
               <div class="footer-copyright">
                 <div>
                   &copy;
-                  <a href="https://www.secretify.io">secretify.io</a> by
-                  <a href="https://github.com/DarioCalovic">Dario Calovic</a>,
+                  <a href="https://www.secretify.io">secretify.io</a>
                   {{ year }} under GNU license . Build with a lot of coffee ☕.
                   <span v-if="metaSetting && metaSetting.hoster.name">
-                    Hosted by
+                    Hosted for
                     <a :href="metaSetting.hoster.address">{{
                       metaSetting.hoster.name
                     }}</a
@@ -26,7 +25,7 @@
             <p
               class="level-item"
               v-if="
-                $config.track.enabled &&
+                $config.track.enabled === 'true' &&
                 $config.track.apiURL &&
                 $config.track.domain
               "

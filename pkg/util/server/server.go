@@ -30,7 +30,6 @@ type Config struct {
 
 // Start starts mux server
 func Start(r *mux.Router, cfg *Config) {
-	// TODO : make configurable
 	cors := handlers.CORS(
 		handlers.AllowedHeaders([]string{"content-type"}),
 		handlers.AllowedOrigins(cfg.CORSAllowedOrigins),
@@ -47,7 +46,7 @@ func Start(r *mux.Router, cfg *Config) {
 	go func() {
 		fmt.Println("Starting server")
 		if err := srv.ListenAndServe(); err != nil {
-			log.Fatal("Failed to start server")
+			log.Fatal(fmt.Printf("Failed to start server. Reason %v", err))
 		}
 	}()
 

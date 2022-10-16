@@ -1,8 +1,9 @@
 package secretify
 
+// MaxFileSize default max file size
 const MaxFileSize = 5242880 // 5 MB
-// const AllowedFileExtensions = "jpeg,jpg,gif,png,eps,raw,tif,tiff,bmp,log,txt,key,pem,csv" // comma separated
-const AllowedFileExtensions = "" // comma separated
+// AllowedFileExtensions default allowed file extensions
+const AllowedFileExtensions = "" // comma separated, e.g. "jpeg,jpg,gif,png,eps,raw,tif,tiff,bmp,log,txt,key,pem,csv"
 
 type File struct {
 	Base

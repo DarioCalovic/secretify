@@ -1,3 +1,6 @@
+import path from 'path'
+import fs from 'fs'
+
 /*
  ** This is for GitHub pages
  */
@@ -45,6 +48,15 @@ export default {
     ],
   },
   /*
+  * Server
+  */
+  server: {
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'cert.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem'))
+    }
+  },
+  /*
    ** Customize the progress-bar color
    */
   loading: { color: '#fff' },
@@ -62,7 +74,6 @@ export default {
     { src: '~/plugins/filters.js' },
     { src: '~/plugins/vee-validate.js', mode: 'client' },
     { src: '~/plugins/crypto.js', mode: 'client' },
-    { src: '~/plugins/peerjs.js', mode: 'client' },
     { src: '~/plugins/track.js', mode: 'client' },
   ],
   /*
@@ -86,9 +97,16 @@ export default {
     ['nuxt-buefy', { materialDesignIcons: false }],
     '@nuxtjs/axios',
     'nuxt-clipboard',
+    '@nuxt/content',
     // Nuxt 3 only '@nuxt/content',
     // Doc: https://axios.nuxtjs.org/usage
   ],
+  /*
+  * Nuxt content
+  */
+  content: {
+    navigation: false,
+  },
   /*
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
@@ -107,11 +125,7 @@ export default {
    */
   build: {
     loaders: {
-      sass: {
-        additionalData: `
-        $body-background-color: #e3000b;
-      `
-      }
+      sass: {}
     },
     /*
      ** You can extend webpack config here
@@ -129,24 +143,20 @@ export default {
   },
   publicRuntimeConfig: {
     apiURL: process.env.API_URL || 'http://localhost:8800/api/v1',
-    uiURL: process.env.UI_URL || 'http://localhost:3000',
+    uiURL: process.env.UI_URL || 'https://localhost:3000',
     apiKey: process.env.API_KEY || '',
+    marketing: {
+      show: process.env.MARKETING_SHOW || 'true',
+    },
     branding: {
-      primary_color: process.env.BRANDING_PRIMARY_COLOR || '#0862ff',
+      primary_color: process.env.BRANDING_PRIMARY_COLOR || '#669eff',
       logo: process.env.BRANDING_LOGO || ''
     },
     track: {
-      enabled: process.env.TRACK_ENABLED || false,
+      enabled: process.env.TRACK_ENABLED || 'false',
       domain: process.env.TRACK_PLAUSIBLE_DOMAIN || 'localhost:3000',
-      localhost: process.env.TRACK_PLAUSIBLE_LOCALHOST || true,
+      localhost: process.env.TRACK_PLAUSIBLE_LOCALHOST || 'true',
       apiURL: process.env.TRACK_PLAUSIBLE_API_URL || 'http://localhost:8000',
-    },
-    peer: {
-      socketAddress: process.env.PEER_SOCKET_ADDRESS || 'http://localhost:5000',
-      socketPath: process.env.PEER_SOCKET_PATH || '/socket',
-      path: process.env.PEER_PATH || '/peerjs',
-      host: process.env.PEER_HOST || 'localhost',
-      port: process.env.PEER_PORT || '9000'
     }
   },
 }

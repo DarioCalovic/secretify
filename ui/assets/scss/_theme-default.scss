@@ -2,7 +2,7 @@
 @import "~bulma/sass/utilities/_all";
 
 // Set your colors
-$primary: #292929;
+$primary: #171321;
 
 // Setup $colors to use as bulma classes (e.g. 'is-twitter')
 $colors: mergeColorMaps(
@@ -64,17 +64,17 @@ $colors: mergeColorMaps(
 );
 
 /* Base color */
-$base-color: #292d34;
+$base-color: #171321;
 $base-color-light: rgba(24, 28, 33, 0.06);
 
 
 /* General overrides */
 // $body-background-color: #0862ff;
-$body-background-color: var(--main-bg-color, #0862ff);
+$body-background-color: #06111C;
 $title-size: $size-1;
 
 /* NavBar: specifics */
-$navbar-background-color: $body-background-color;
+$navbar-background-color: #ffffff;
 
 /* Footer: specifics */
 $footer-background-color: transparent;

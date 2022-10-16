@@ -9,6 +9,7 @@ type Service interface {
 	Meta() utilconfig.Meta
 	Policy() utilconfig.Policy
 	Storage() utilconfig.Storage
+	Outlook() utilconfig.Outlook
 }
 
 // User represents setting application service

@@ -9,7 +9,6 @@ import (
 	"github.com/DarioCalovic/secretify/pkg/api/setting"
 	utilconfig "github.com/DarioCalovic/secretify/pkg/util/config"
 	utildb "github.com/DarioCalovic/secretify/pkg/util/db"
-	"github.com/DarioCalovic/secretify/pkg/util/mail"
 	"github.com/DarioCalovic/secretify/pkg/util/ticker"
 )
 
@@ -26,17 +25,14 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// Init mailer
-	mailer := mail.NewMailer(cfg.SMTP.MailJet.APIKeyPublic, cfg.SMTP.MailJet.APIKeyPrivate)
-
 	// Run Ticker
 	cfgService := setting.Initialize(cfg)
 	fileService := file.Initialize(sqlitedb, cfgService)
-	secretService := secret.Initialize(sqlitedb, cfgService, fileService, mailer)
+	secretService := secret.Initialize(sqlitedb, cfgService, fileService)
 	t := ticker.New(cfg, secretService)
 	go t.RunTask()
 
-	err = pkgapi.Start(cfg, sqlitedb, mailer)
+	err = pkgapi.Start(cfg, sqlitedb)
 	if err != nil {
 		log.Fatal(err)
 	}

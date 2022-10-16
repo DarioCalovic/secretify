@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -10,19 +11,12 @@ import (
 
 type Configuration struct {
 	GlobalPassphraseFile string    `json:"-"`
-	SMTP                 *SMTP     `json:"smtp"`
 	Meta                 *Meta     `json:"meta"`
 	Server               *Server   `json:"server"`
 	DB                   *Database `json:"database"`
 	Storage              *Storage  `json:"storage"`
 	Policy               *Policy   `json:"policy"`
-}
-
-type SMTP struct {
-	MailJet struct {
-		APIKeyPublic  string `json:"api_key_public"`
-		APIKeyPrivate string `json:"api_key_private"`
-	} `json:"mailjet"`
+	Outlook              *Outlook  `json:"outlook"`
 }
 
 type Meta struct {
@@ -37,9 +31,6 @@ type Policy struct {
 	Identifier struct {
 		Size int `json:"size"`
 	} `json:"identifier"`
-	Mail struct {
-		Enabled bool `json:"enabled"`
-	} `json:"mail"`
 	Webhook struct {
 		Enabled bool `json:"enabled"`
 	} `json:"webhook"`
@@ -104,9 +95,14 @@ type FileSystem struct {
 	Location string `json:"location"`
 }
 
+type Outlook struct {
+	Enabled bool   `json:"enabled"`
+	AppID   string `json:"app_id"`
+	UIURL   string `json:"ui_url"`
+}
+
 func NewConfiguration() *Configuration {
 	return &Configuration{
-		SMTP: &SMTP{},
 		Meta: &Meta{},
 		Server: &Server{
 			Auth: &Auth{},
@@ -114,6 +110,7 @@ func NewConfiguration() *Configuration {
 		DB:      &Database{},
 		Storage: &Storage{},
 		Policy:  &Policy{},
+		Outlook: &Outlook{},
 	}
 }
 
@@ -129,6 +126,10 @@ func Load() (*Configuration, error) {
 func (c *Configuration) Validate() error {
 	if c.Server.BasePath == "/" {
 		c.Server.BasePath = ""
+	}
+	// Outlook
+	if c.Outlook.Enabled && c.Outlook.AppID == "" {
+		return errors.New("no outlook app id provided")
 	}
 	return nil
 }
@@ -152,8 +153,6 @@ func ParseFlags(fs *flag.FlagSet) *Configuration {
 
 	// Policy
 	fs.IntVar(&cfg.Policy.Identifier.Size, "Policy_Identifier_Size", 18, "Size of the identifier")
-	fs.BoolVar(&cfg.Policy.Mail.Enabled, "Policy_Mail_Enabled", false, "Enable sending emails or not")
-	fs.BoolVar(&cfg.Policy.Webhook.Enabled, "Policy_Webhook_Enabled", true, "Enable issueing webhooks")
 	fs.IntVar(&cfg.Policy.Secret.MaxLength, "Policy_Secret_MaxLength", 500, "Secret's max length")
 	fs.StringVar(&cfg.Policy.Secret.RevealDuration, "Policy_Secret_RevealDuration", "60s", "Amount of time the secret will be shown when revealing on the UI")
 	fs.BoolVar(&cfg.Policy.Passphrase.Required, "Policy_Passphrase_Required", false, "Passphrase required or not")
@@ -164,13 +163,14 @@ func ParseFlags(fs *flag.FlagSet) *Configuration {
 	// Policy Security
 	fs.StringVar(&cfg.Policy.Security.CORS.allowedOrigins, "Policy_Security_CORS_AllowedOrigins", "*", "Set CORS AllowedOrigins settings for security reasons (comma separated)")
 
+	// Outlook
+	fs.BoolVar(&cfg.Outlook.Enabled, "Outlook_Enabled", false, "Enable outlook integration")
+	fs.StringVar(&cfg.Outlook.AppID, "Outlook_AppID", "", "Outlook add-in app id")
+	fs.StringVar(&cfg.Outlook.UIURL, "Outlook_UI_URL", "https://localhost:3000", "Outlook add-in ui url")
+
 	// Meta
 	fs.StringVar(&cfg.Meta.Hoster.Name, "Meta_Hoster_Name", "", "Meta information about the hoster name")
 	fs.StringVar(&cfg.Meta.Hoster.Address, "Meta_Hoster_Address", "", "Meta information about the hoster address")
-
-	// SMTP
-	fs.StringVar(&cfg.SMTP.MailJet.APIKeyPublic, "SMTP_MailJet_APIKey_Public", "", "MailJet public api key")
-	fs.StringVar(&cfg.SMTP.MailJet.APIKeyPrivate, "SMTP_MailJet_APIKey_Private", "", "MailJet private api key")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		os.Exit(1)

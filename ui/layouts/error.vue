@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container error">
     <div class="columns is-vcentered is-centered has-text-centered dotted">
       <div class="column is-5">
         <div class="box">
@@ -30,9 +30,11 @@
           <div class="box__description">
             <div class="box__description-container">
               <template v-if="error.statusCode === 404" class="title">
-                <h3 class="title">Whoops!</h3>
+                <h1 class="title">Whoops!</h1>
                 <div class="box__description-text">
-                  It seems like we couldn't find the page you were looking for
+                  <p class="is-medium">
+                    It seems like we couldn't find the page you were looking for
+                  </p>
                 </div>
               </template>
               <template v-else>
@@ -44,7 +46,7 @@
             </div>
 
             <nuxt-link
-              class="button is-primary"
+              class="button is-white"
               :to="{
                 path: '/',
               }"

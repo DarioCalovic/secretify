@@ -24,7 +24,6 @@ export default {
         '--main-bg-color',
         this.$config.branding.primary_color
       )
-      document.documentElement.style.setProperty('display', 'block')
     })
   },
 }

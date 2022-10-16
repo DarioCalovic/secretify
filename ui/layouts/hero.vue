@@ -12,11 +12,6 @@
     </div>
   </section>
 </template>
-<style scoped>
-html {
-  background-color: red !important;
-}
-</style>
 <script>
 // @ is an alias to /src
 import NavBar from '@/components/NavBar'
@@ -34,7 +29,6 @@ export default {
         '--main-bg-color',
         this.$config.branding.primary_color
       )
-      document.documentElement.style.setProperty('display', 'block')
     })
   },
 }

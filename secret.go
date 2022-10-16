@@ -4,14 +4,18 @@ import "time"
 
 type Secret struct {
 	Base
-	Identifier    string `gorm:"unique"`
-	Cipher        string
-	Email         string
-	WebhookAddr   string
+	Identifier string `gorm:"unique"`
+
+	// Cipher attributes
+	Cipher string
+
+	// Policy attributes
 	ExpiresAt     time.Time
 	HasPassphrase bool
 	RevealOnce    bool
 	DestroyManual bool
-	FileID        int
-	File          File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+
+	// File attributes
+	FileID int
+	File   File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

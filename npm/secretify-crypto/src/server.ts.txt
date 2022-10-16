@@ -1,0 +1,30 @@
+import {
+    encryptData,
+} from './shared'
+
+import base64url from 'base64url'
+
+import { Blob } from 'node:buffer' // Node only
+
+const cryptoNode = require('node:crypto');  // Node only
+// const crypto = require('node:crypto').webcrypto;  // Node only
+
+const blobToBase64 = async (blob: Blob) => {
+    const buffer = await blob.arrayBuffer().then((textBuffer) => Buffer.from(textBuffer))
+    return "data:" + blob.type + ';base64,' + buffer.toString('base64')
+}
+
+export const encryptString = async (text: string, encryptionKey: string) => {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(text)
+
+    const encryptedData = await encryptData(data, encryptionKey)
+
+    const encryptedDataBase64 = blobToBase64(encryptedData)
+    return encryptedDataBase64
+}
+
+export const createHash = (val: string) => {
+    const hash = cryptoNode.createHash('sha256').update(Buffer.from(val)).digest()
+    return base64url.encode(hash)
+}

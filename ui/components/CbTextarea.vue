@@ -12,7 +12,8 @@
   font-size: 1.2rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: pre;
+  white-space: pre-line;
+  min-height: 3.1rem;
 }
 </style>
 <script>

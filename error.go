@@ -12,7 +12,7 @@ var (
 	// ErrRecordNotFound (404) is returned when a record was not found
 	ErrRecordNotFound = errors.New("record not found")
 
-	ErrForbidden = errors.New("Forbidden to access resource")
+	ErrForbidden = errors.New("forbidden to access resource")
 
 	// ErrUnauthorized (401) is returned when user is not authorized
 	ErrUnauthorized = errors.New(http.StatusText(http.StatusUnauthorized))

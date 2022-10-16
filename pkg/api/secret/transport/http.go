@@ -48,8 +48,6 @@ type createReq struct {
 	DestroyManual  bool   `json:"destroy_manual"`
 	HasPassphrase  bool   `json:"has_passphrase"`
 	FileIdentifier string `json:"file_identifier"`
-	Email          string `json:"email"`
-	WebhookAddr    string `json:"webhook_addr"`
 }
 
 type createRes struct {
@@ -116,9 +114,9 @@ func (h *HTTP) create(w http.ResponseWriter, r *http.Request) {
 		scr secretify.Secret
 	)
 	if cr.FileIdentifier == "" {
-		scr, err = h.svc.Create(cr.Cipher, cr.HasPassphrase, expires, cr.RevealOnce, cr.DestroyManual, 0, cr.Email, cr.WebhookAddr)
+		scr, err = h.svc.Create(cr.Cipher, cr.HasPassphrase, expires, cr.RevealOnce, cr.DestroyManual, 0)
 	} else {
-		scr, err = h.svc.CreateWithFile(cr.Cipher, cr.HasPassphrase, expires, cr.RevealOnce, cr.DestroyManual, cr.FileIdentifier, cr.Email, cr.WebhookAddr)
+		scr, err = h.svc.CreateWithFile(cr.Cipher, cr.HasPassphrase, expires, cr.RevealOnce, cr.DestroyManual, cr.FileIdentifier)
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)

@@ -7,13 +7,11 @@ import (
 
 	"github.com/DarioCalovic/secretify"
 	"github.com/DarioCalovic/secretify/pkg/api/setting"
-	"github.com/DarioCalovic/secretify/pkg/util/mail"
 	"github.com/DarioCalovic/secretify/pkg/util/nanoid"
-	mailjet "github.com/mailjet/mailjet-apiv3-go"
 )
 
 // Create creates a new encrypted secret
-func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileID int, email string, webhookAddr string) (secretify.Secret, error) {
+func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileID int) (secretify.Secret, error) {
 	identifier, err := nanoid.GenerateIdentifier(s.cfgSvc.Policy().Identifier.Size)
 	if err != nil {
 		return secretify.Secret{}, err
@@ -24,8 +22,6 @@ func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Ti
 		ExpiresAt:     expiresAt,
 		RevealOnce:    revealOnce,
 		DestroyManual: destroyManual,
-		Email:         email,
-		WebhookAddr:   webhookAddr,
 		HasPassphrase: hasPassphrase,
 	}
 	if fileID > 0 {
@@ -35,69 +31,19 @@ func (s *Secret) Create(ciphertext string, hasPassphrase bool, expiresAt time.Ti
 	if err != nil {
 		return secretify.Secret{}, err
 	}
-
-	// Send mail
-	if s.cfgSvc.Policy().Mail.Enabled && email != "" {
-		go func() {
-			htmlBody, err := mail.SecretCreatedHTMLBody("link", s.cfgSvc.Meta().Hoster.Name, s.cfgSvc.Meta().Hoster.Address)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			textBody, err := mail.SecretCreatedTextBody("link", s.cfgSvc.Meta().Hoster.Name, s.cfgSvc.Meta().Hoster.Address)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			err = s.mailer.Send(email, "Your secret has been created", htmlBody, textBody, "SecretifySecretCreated")
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-		}()
-	}
-
-	if s.cfgSvc.Policy().Webhook.Enabled && secret.WebhookAddr != "" {
-		// TODO : send webhook
-		fmt.Println("Posting to webhook ", secret.WebhookAddr)
-	}
 	return secret, nil
 }
 
 // Create creates a new encrypted secret with an encrypted file
-func (s *Secret) CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileIdentifier string, email string, webhookAddr string) (secretify.Secret, error) {
+func (s *Secret) CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileIdentifier string) (secretify.Secret, error) {
+	if s.fileSvc == nil {
+		return secretify.Secret{}, errors.New("could not contact file service, file storage not enabled probably")
+	}
 	file, err := s.fileSvc.Repo().ViewByIdentifier(s.db, fileIdentifier)
 	if err != nil {
 		return secretify.Secret{}, err
 	}
-	return s.Create(ciphertext, hasPassphrase, expiresAt, revealOnce, destroyManual, file.ID, email, webhookAddr)
-}
-
-func sendEmail() {
-	mailjetClient := mailjet.NewMailjetClient("c4bf39bd29338413af37451bbd2ac507", "ebf4d1945f419fb055b003b157b126a0")
-	messagesInfo := []mailjet.InfoMessagesV31{
-		mailjet.InfoMessagesV31{
-			From: &mailjet.RecipientV31{
-				Email: "no-reply@secretify.io",
-				Name:  "Secretify",
-			},
-			To: &mailjet.RecipientsV31{
-				mailjet.RecipientV31{
-					Email: "dario.calovic@itdistrict.ch",
-				},
-			},
-			Subject:  "Greetings from Mailjet.",
-			TextPart: "My first Mailjet email",
-			HTMLPart: "<h3>Dear passenger 1, welcome to <a href='https://www.mailjet.com/'>Mailjet</a>!</h3><br />May the delivery force be with you!",
-			CustomID: "AppGettingStartedTest",
-		},
-	}
-	messages := mailjet.MessagesV31{Info: messagesInfo}
-	res, err := mailjetClient.SendMailV31(&messages)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("Data: %+v\n", res)
+	return s.Create(ciphertext, hasPassphrase, expiresAt, revealOnce, destroyManual, file.ID)
 }
 
 // View returns the secret's information, deletes it afterwards and
@@ -120,7 +66,7 @@ func (s *Secret) View(identifier string, onlyMeta bool) (secret secretify.Secret
 		if err != nil {
 			return
 		}
-		if secret.FileID > 0 {
+		if secret.FileID > 0 && s.fileSvc != nil {
 			go func() {
 				time.Sleep(30 * time.Second)
 				err = s.fileSvc.Repo().Delete(s.db, secret.File.Identifier)
@@ -136,19 +82,6 @@ func (s *Secret) View(identifier string, onlyMeta bool) (secret secretify.Secret
 		}
 		deleted = true
 	}
-	// TODO : send email
-	// if s.cfgSvc.Policy().Mail.Enabled && secret.Email != "" {
-	// 	var additionalInfo string
-	// 	if deleted {
-	// 		additionalInfo = "The secret was deleted."
-	// 	}
-	// 	go s.mailer.SendRevealedSecret(secret.Email, fmt.Sprintf("%s/s/%s", s.cfgSvc.Meta().UIURL, secret.Identifier), s.cfgSvc.Meta().Hoster.Name, s.cfgSvc.Meta().Hoster.Address, additionalInfo)
-	// }
-
-	// TODO : send webhook
-	if s.cfgSvc.Policy().Webhook.Enabled && secret.WebhookAddr != "" {
-		fmt.Println("Posting to webhook ", secret.WebhookAddr)
-	}
 	return
 }
 
@@ -161,7 +94,7 @@ func (s *Secret) Delete(identifier string) error {
 	if !secret.DestroyManual {
 		return errors.New("destroying manually is disabled for this secret")
 	}
-	if secret.FileID > 0 {
+	if secret.FileID > 0 && s.fileSvc != nil {
 		err = s.fileSvc.Repo().Delete(s.db, secret.File.Identifier)
 		if err != nil {
 			return err
@@ -188,7 +121,7 @@ func (s *Secret) DeleteExpired() error {
 	}
 	// Delete all files
 	for _, secret := range secrets {
-		if secret.FileID > 0 {
+		if secret.FileID > 0 && s.fileSvc != nil {
 			err = s.fileSvc.Repo().Delete(s.db, secret.File.Identifier)
 			if err != nil {
 				return err

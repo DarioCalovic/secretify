@@ -118,14 +118,6 @@ func (h *HTTP) upload(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type downloadRes struct {
-	Cipher        string    `json:"cipher"`
-	ExpiresAt     time.Time `json:"expires_at"`
-	HasPassphrase bool      `json:"has_passphrase"`
-	RevealOnce    bool      `json:"reveal_once"`
-	Deleted       bool      `json:"deleted"`
-}
-
 func (h *HTTP) download(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json; charset=utf-8")
 	vars := mux.Vars(r)

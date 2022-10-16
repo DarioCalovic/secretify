@@ -12,12 +12,6 @@ type Base struct {
 	DeletedAt time.Time `json:"deleted_at,omitempty" gorm:"index"`
 }
 
-// ListQuery holds company/location data used for list db queries
-type ListQuery struct {
-	Query string
-	ID    int
-}
-
 type HTTPErrorResponse struct {
 	Error string `json:"error"`
 }

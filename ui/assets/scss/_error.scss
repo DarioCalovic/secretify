@@ -1,10 +1,10 @@
 
 //variables
-$l-purple: $body-background-color;
+$l-purple: #06111C;
 $t-purple: #8c8aa7;
-$shadow-color: #111;
+$shadow-color: #6f7882;
 $pink: #ff5e65;
-$white: #fff;
+$white: #ddd;
 
 .box {
   background: transparent;
@@ -269,7 +269,7 @@ $white: #fff;
   }
 }
 
-h3.title {
+.error h3.title {
   color: $white;
 }
 
@@ -309,4 +309,18 @@ h3.title {
   100% {
     opacity: 0.2;
   }
+}
+
+.error .dotted {
+  background: #06111C !important;
+}
+
+.error h1 {
+  font-size: 3.6rem;
+  color: #fff;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
 }

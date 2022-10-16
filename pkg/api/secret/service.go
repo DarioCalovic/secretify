@@ -8,13 +8,12 @@ import (
 	"github.com/DarioCalovic/secretify/pkg/api/secret/plattform/sqlite"
 	"github.com/DarioCalovic/secretify/pkg/api/setting"
 	utildb "github.com/DarioCalovic/secretify/pkg/util/db"
-	"github.com/DarioCalovic/secretify/pkg/util/mail"
 )
 
 // Service represents secret application interface
 type Service interface {
-	Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileID int, email string, webhookAddr string) (secretify.Secret, error)
-	CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileIdentifier string, email string, webhookAddr string) (secretify.Secret, error)
+	Create(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileID int) (secretify.Secret, error)
+	CreateWithFile(ciphertext string, hasPassphrase bool, expiresAt time.Time, revealOnce bool, destroyManual bool, fileIdentifier string) (secretify.Secret, error)
 	View(identifier string, onlyMeta bool) (secret secretify.Secret, deleted bool, err error)
 	Delete(identifier string) error
 	DeleteExpired() error
@@ -36,19 +35,18 @@ type Secret struct {
 	repo    Repository
 	cfgSvc  setting.Service
 	fileSvc file.Service
-	mailer  *mail.Mailer
 }
 
 // New creates new secret application service
-func New(db utildb.DB, sdb Repository, cfgSvc setting.Service, fileSvc file.Service, mailer *mail.Mailer) *Secret {
-	return &Secret{db, sdb, cfgSvc, fileSvc, mailer}
+func New(db utildb.DB, sdb Repository, cfgSvc setting.Service, fileSvc file.Service) *Secret {
+	return &Secret{db, sdb, cfgSvc, fileSvc}
 }
 
 // Initialize initalizes secret application service with defaults
-func Initialize(db utildb.DB, cfgSvc setting.Service, fileSvc file.Service, mailer *mail.Mailer) *Secret {
+func Initialize(db utildb.DB, cfgSvc setting.Service, fileSvc file.Service) *Secret {
 	switch db.(type) {
 	case *utildb.SQLiteDB:
-		return New(db, sqlite.NewSQLiteSecretRepository(), cfgSvc, fileSvc, mailer)
+		return New(db, sqlite.NewSQLiteSecretRepository(), cfgSvc, fileSvc)
 	}
-	return New(db, nil, cfgSvc, fileSvc, mailer)
+	return New(db, nil, cfgSvc, fileSvc)
 }

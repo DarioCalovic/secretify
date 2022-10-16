@@ -10,16 +10,19 @@
           Secretify
         </b-navbar-item>-->
         <a href="/" class="navbar-item title nuxt-link-active"
-          ><img src="~/assets/img/logo-white.png" /> secretify</a
+          ><img src="~/assets/img/logo-dark.png" /> secretify</a
         >
       </template>
-      <template #end>
-        <!-- <b-navbar-item tag="router-link" :to="{ path: '/login' }">
-          Login
-        </b-navbar-item>
-        -->
+      <template #start>
         <b-navbar-item tag="router-link" :to="{ path: '/about' }">
           About
+        </b-navbar-item>
+      </template>
+      <template #end>
+        <b-navbar-item v-show="$config.marketing.show === 'true'" tag="div">
+          <b-button tag="router-link" to="/pricing" type="is-primary">
+            Pricing
+          </b-button>
         </b-navbar-item>
         <b-navbar-item v-if="$config.branding.logo" tag="div"
           ><img :src="$config.branding.logo"

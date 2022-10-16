@@ -6,17 +6,19 @@
 
 /* Theme components */
 @import "nav-bar";
+@import "content";
 @import "footer";
 @import "error";
 
 html {
-    display: none;
+    background-color: #06111C !important;
 } 
 
 .card {
-    border-radius: 4px;
+    border-radius: 8px;
     border: 0;
     box-shadow: 0 15px 45px rgb(16 30 54 / 15%);
+    box-shadow: none;
 }
 
 .fade-enter-active,
@@ -28,12 +30,21 @@ html {
 }
 
 .dotted {
-    background: url("~/assets/img/dots.svg");
+    position: relative;
+    background-color: #F2F1F5;
+    border-radius: 15px;
+}
+
+.dotted .column {
+    position: relative;
+    z-index: 100;
 }
 
 @media (min-width: 768px) {
     .head {
         padding: 1.1rem;
+        padding-top: 3rem;
+        background: white;
     }
 
     .dotted {
@@ -94,7 +105,7 @@ nav.tabs {
 
 .title,
 .subtitle {
-    color: white;
+    color: #171321;
 }
 
 .white,
@@ -127,12 +138,12 @@ nav.tabs {
 }
 
 .subtitle strong {
-    color: #ffffff;
+    color: #171321;
 }
 
 .subtitle a {
     text-decoration: underline;
-    color: white;
+    color: #171321;
 }
 
 .textarea:not([rows]) {
@@ -145,7 +156,8 @@ nav.tabs {
     min-height: 6em;
 }
 .dark {
-    white-space: nowrap;
+    /* white-space: nowrap; */
+    word-break: break-all;
 }
 
 .tabs li.is-active {
@@ -153,7 +165,7 @@ nav.tabs {
 }
 
 .tabs li.is-active a {
-    color: $body-background-color !important;
+    color: #171321;
 }
 
 .upload .upload-draggable.is-danger,
@@ -162,53 +174,175 @@ nav.tabs {
     background: rgba(241, 70, 104, 0.05);
 }
 
-.darkness .cl {
+.blank .cl {
     font-size: 1.4rem;
-    color: #fff;
     text-align: center;
     margin: 2rem 0;
 }
 
-.darkness .cl .tag {
+.blank .cl .tag {
     margin: 5px;
 }
 
-.darkness p {
+.blank p {
     margin-bottom: 1rem;
 }
 
-.darkness p,
-.darkness strong {
-    color: #fff;
-}
-
-.darkness ul {
+.blank ul:not(.menu-list) {
     margin-left: 2rem;
     margin-bottom: 1rem;
 }
 
-.darkness ul li {
-    color: #fff;
+.blank ul:not(.menu-list) li {
     list-style-type: circle;
 }
 
-.darkness h1.title {
-    font-size: 2.6rem;
+.blank h1.title {
+    font-size: 3.6rem;
 }
 
-.darkness h2.title {
+.blank .subtitle.is-3 {
+    font-size: 2.4rem;
+}
+
+.blank h2.title {
     margin-bottom: 0.5rem;
 }
 
-.darkness .title {
-    color: #fff;
+.created .textarea:not([rows]) {
+    min-height: 3em;
 }
 
-.darkness a {
-    text-decoration: underline;
-    color: #ffffff;
+.hero-body {
+    background-color: #ffffff !important;
 }
 
-.darkness a:hover {
-    color: rgba(255, 255, 255, 0.6);
+.blank {
+    background: #ffffff;
+}
+
+.navbar-item img {
+    min-height: 2.2rem;
+}
+
+.card.bordered {
+    border: 1px solid #e8e7eb;
+    box-shadow: 0 8px 50px -24px #d1d0d3;
+    border-radius: 0;
+}
+
+.card .content.back {
+    background: #F2F1F5;
+    padding: 1.5rem;
+    min-height: 25rem;
+}
+
+.card .content.back .title {
+    margin-bottom: .5rem;
+    margin-top: 1rem;
+}
+
+.card .content.back.colorful {
+    background: #d3d9e0;
+}
+
+.price-details {
+    display: flex;
+    margin-bottom: 2rem;
+}
+
+.price-details .price {
+    font-size: 5rem;
+    font-weight: bold;
+    line-height: 4rem;
+    top: 0;
+    letter-spacing: -.2rem;
+    color: #06111C;
+}
+
+.price-details .details {
+    max-width: 150px;
+    margin-left: .5rem;
+}
+
+.price-details .details p {
+    font-size: .8rem;
+    margin-bottom: .1rem;
+}
+
+.card .content.back p.note {
+    margin-bottom: 0;
+    margin-top: 1rem;
+    font-size: .8rem;
+}
+
+.card.colorful {
+    background: #d3d9e0;
+}
+
+p.is-medium {
+    font-size: 1.2rem;
+}
+
+
+.blank .column .section:first-child {
+    padding-top: 0;
+}
+
+.blank .column .section {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.mdi-check {
+    color: green;
+    font-weight: bold;
+}
+
+ul.fake {
+    margin-left: 1rem !important;
+}
+
+ul.fake li {
+    list-style-type: none !important;
+}
+
+.shape {
+    background: var(--main-bg-color, transparent);
+    position: absolute;
+    z-index: 5;
+    margin-left: auto;
+    margin-right: auto;
+    top: -3.6rem;
+    left: 0;
+    right: 0;
+    width: 100%;
+    aspect-ratio : 1 / 1;
+    border-radius: 100%;
+}
+
+@media (min-width: 480px) {
+    .shape {
+        width: 28rem;
+        height: 28rem;
+        border-radius: 28rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .shape {
+        left: -3.6rem;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+.hero-head.head {
+    position: relative;
+    z-index: 200;
+    background: #ffffff;
+}
+
+.button.nuxt-link-active.is-text {
+    color: #171321;
 }
