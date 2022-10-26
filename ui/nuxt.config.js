@@ -50,12 +50,12 @@ export default {
   /*
   * Server
   */
-  server: {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'cert.key')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem'))
-    }
-  },
+  // server: {
+  //   https: {
+  //     key: fs.readFileSync(path.resolve(__dirname, 'cert.key')),
+  //     cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem'))
+  //   }
+  // },
   /*
    ** Customize the progress-bar color
    */

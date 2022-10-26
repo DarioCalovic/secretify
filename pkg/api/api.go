@@ -25,6 +25,8 @@ const (
 // Start starts the API service
 func Start(cfg *utilconfig.Configuration, db utildb.DB) error {
 	r := server.New()
+	r.HandleFunc("/", status).
+		Methods("GET")
 	r.Use(loggingMiddleware)
 	s := r.PathPrefix(fmt.Sprintf("%s/%s/%s", cfg.Server.BasePath, "api", apiVersion)).Subrouter()
 
@@ -47,7 +49,7 @@ func Start(cfg *utilconfig.Configuration, db utildb.DB) error {
 
 	// Outlook
 	if cfg.Outlook.Enabled {
-		otransport.NewHTTP(outlook.Initialize(cfgService), s)
+		otransport.NewHTTP(outlook.Initialize(cfgService), s, cfg.Outlook.AppID)
 	}
 
 	server.Start(r, &server.Config{

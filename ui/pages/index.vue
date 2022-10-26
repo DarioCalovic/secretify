@@ -332,7 +332,10 @@ export default {
         secret:
           'The secret will be encrypted client-side and only the cipher and meta information will be stored safe until it gets deleted. The key will not be stored anywhere but added only to the link.',
       },
-      file: null,
+      file: {
+        name: null,
+        size: 0,
+      },
     }
   },
   computed: {
@@ -340,9 +343,18 @@ export default {
       policySetting: (state) => {
         return state.policySetting
       },
+      offline: (state) => {
+        return state.offline
+      },
     }),
   },
   mounted() {
+    if (this.offline) {
+      Toast.open({
+        message: 'API seems offline. Please contact administrator.',
+        type: 'is-danger',
+      })
+    }
     // Track
     this.$track.pageview({})
   },
@@ -390,10 +402,9 @@ export default {
 
       // Client encryption
       const key = await this.$crypto.generateEncryptionKeyString()
-
       // Handle file input
       let fileIdentifier
-      if (this.file) {
+      if (this.file && this.file.name && this.file.siz > 0) {
         let fileCipher = this.file
         if (passphrase) {
           fileCipher = await this.$crypto.encryptFile(fileCipher, passphrase)

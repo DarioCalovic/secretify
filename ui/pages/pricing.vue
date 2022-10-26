@@ -68,7 +68,7 @@
                   <div class="button-group">
                     <a
                       class="button is-primary"
-                      href="mailto:sales@secretify.io?subject=I am interessted in Secretify Premium!&body=I am interessted to get more information about Secretify Premium. Our company has about 100 employee's. Let's talk!"
+                      href="mailto:dario.calovic@gmail.com?subject=I am interessted in Secretify Premium!&body=I am interessted to get more information about Secretify Premium. Our company has about 100 employee's. Let's talk!"
                       >Contact sales</a
                     >
                   </div>

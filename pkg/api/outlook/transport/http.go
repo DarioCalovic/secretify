@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/DarioCalovic/secretify/pkg/api/outlook"
@@ -17,12 +18,12 @@ type HTTP struct {
 }
 
 // NewHTTP creates new outlook http service
-func NewHTTP(svc outlook.Service, r *mux.Router) {
+func NewHTTP(svc outlook.Service, r *mux.Router, id string) {
 	h := HTTP{svc}
 
 	s := r.PathPrefix(route).Subrouter()
 
-	s.HandleFunc("/_manifest", h.manifest).
+	s.HandleFunc(fmt.Sprintf("/_manifest_%s", id), h.manifest).
 		Methods("GET")
 
 }

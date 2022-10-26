@@ -9,7 +9,7 @@
                 <div>
                   &copy;
                   <a href="https://www.secretify.io">secretify.io</a>
-                  {{ year }} under GNU license . Build with a lot of coffee ☕.
+                  {{ year }}. Build with a lot of coffee ☕.
                   <span v-if="metaSetting && metaSetting.hoster.name">
                     Hosted for
                     <a :href="metaSetting.hoster.address">{{
@@ -23,12 +23,12 @@
           </div>
           <div class="level-right">
             <p
-              class="level-item"
               v-if="
                 $config.track.enabled === 'true' &&
                 $config.track.apiURL &&
                 $config.track.domain
               "
+              class="level-item"
             >
               <a :href="$config.track.apiURL + '/' + $config.track.domain"
                 >Stats</a
