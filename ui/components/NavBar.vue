@@ -10,7 +10,7 @@
           Secretify
         </b-navbar-item>-->
         <a href="/" class="navbar-item title nuxt-link-active"
-          ><img src="~/assets/img/logo-dark.png" /> secretify</a
+          ><img src="~/assets/img/logo.svg" /> secretify</a
         >
       </template>
       <template #start>

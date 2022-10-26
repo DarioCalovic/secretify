@@ -1,5 +1,6 @@
-# Secretify
-A secure way to transfer or share secrets
+![Alt text](ui/static/outlook/icon-64.png?raw=true "Title")
+
+A secure way to transfer or share secrets.
 
 **Please note**: Still under heavy development. A working example of the current **beta release** can be found here https://beta.secretify.io
 
