@@ -2,7 +2,8 @@
 
 A secure way to transfer or share secrets.
 
-**Please note**: Still under heavy development. A working example of the current **beta release** can be found here https://beta.secretify.io
+## Project Status
+Secretify is now maintained by [Gravitir](https://github.com/gravitir). Track the current status [here](https://github.com/gravitir/secretify).
 
 ## Getting Started
 
